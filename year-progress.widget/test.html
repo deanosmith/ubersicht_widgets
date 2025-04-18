@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Year Progress Widget</title>
+	<style>
+		/* Widget Container */
+		#progress-container {
+          margin-left: 20px;
+          margin-top: 15px;
+            width: 200px;
+            /* Adjust width as needed */
+            height: 20px;
+            /* Adjust height as needed */
+            background-color: grey;
+            /* Background color of the container */
+            border-radius: 4px;
+            /* Container border radius */
+            border: 2px solid black
+                /* Optional: Add box shadow or border for more depth */
+                /* box-shadow: 2px 2px 5px rgba(0,0,0,0.2); */
+		}
+
+		/* Progress Bar */
+		#progress-bar {
+			height: 100%;
+			/* Full height of the container */
+            width: 10%;
+
+			background-color: black;
+			/* Progress bar color, change as needed */
+			transition: width 0.5s ease-in-out;
+			/* Smooth transition for bar width changes */
+			/* Optional: Add a gradient for a more dynamic look */
+			/*background: linear-gradient(to right, #black, #grey); */
+		}
+
+	</style>
+</head>
+
+<body>
+	<div id="progress-container">
+		<div id="progress-bar"></div>
+		<span id="progress-text"></span>
+	</div>
+	<script>
+          document.addEventListener('DOMContentLoaded', (event) => {
+            const today = new Date();
+            const yearStart = new Date(today.getFullYear(), 0, 1);
+            const daysInYear = (new Date(today.getFullYear(), 11, 31) - yearStart) / (1000 * 60 * 60 * 24) + 1;
+            const daysElapsed = (today - yearStart) / (1000 * 60 * 60 * 24);
+            const progress = Math.floor((daysElapsed / daysInYear) * 100);
+
+            const progressBar = document.getElementById('progress-bar');
+
+            // Update progress bar width and text
+            // progressBar.style.width = `${progress}%`;
+            progressBar.style.width = `50%`;
+
+          });
+</script>
+</body>
+</html>

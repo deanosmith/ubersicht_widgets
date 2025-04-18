@@ -1,0 +1,52 @@
+# Übersicht widget .coffee file
+command: """
+  echo $(osascript -e 'return (current date)')
+"""
+
+refreshFrequency: 1000 * 60 * 60 * 48 # Refresh once every 2 days
+
+style: """
+  #progress-container {
+    position: relative;
+    margin-left: 25px;
+    margin-top: 120px;
+    width: 200px;
+    height: 20px;
+    background-color: grey;
+    border-radius: 4px;
+    border: 2px solid black;
+    overflow: hidden;
+  }
+
+  #progress-bar {
+    height: 100%;
+    background-color: black;
+    transition: width 0.5s ease-in-out;
+  }
+
+  .marker {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: black;
+  }
+"""
+
+render: (output) ->
+  today = new Date()
+  yearStart = new Date(today.getFullYear(), 0, 1)
+  yearEnd = new Date(today.getFullYear(), 11, 31)
+  daysInYear = (yearEnd - yearStart) / (1000 * 60 * 60 * 24) + 1
+  daysElapsed = (today - yearStart) / (1000 * 60 * 60 * 24)
+  progress = Math.floor((daysElapsed / daysInYear) * 100)
+  markersHTML = for i in [1..9]
+    "<div class='marker' style='left: #{i * 10}%'></div>"
+  markersHTML = markersHTML.join ''
+
+  """
+    <div id="progress-container">
+      <div id="progress-bar" style="width: #{progress}%;"></div>
+      #{markersHTML}
+    </div>
+  """
