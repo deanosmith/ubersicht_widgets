@@ -35,6 +35,7 @@ style: """
     border-radius: 5px
     background: black
     font-size: 16px
+    border: 2px solid grey
     font-weight: 400
     opacity: 1
     padding: 6px 5px

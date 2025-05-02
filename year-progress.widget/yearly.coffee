@@ -14,7 +14,7 @@ style: """
     height: 20px;
     background-color: grey;
     border-radius: 4px;
-    border: 2px solid black;
+    border: 2px solid grey;
     overflow: hidden;
     color: white; /* Set the text color for the progress bar here */
     font-family: Arial, sans-serif;

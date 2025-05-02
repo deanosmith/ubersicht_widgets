@@ -37,7 +37,7 @@ style: """
     margin-top: 195px;
     background-color: black;
     border-radius: 6px;
-    border: 2px solid black;
+    border: 2px solid grey;
     color: white;
     font-family: Arial, sans-serif;
     font-size: 15px;
