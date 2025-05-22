@@ -2,7 +2,7 @@
 command: """
   targetDate=$(date -j -f "%Y-%m-%d" "2024-11-04" "+%s") # Replace with your target date
   currentDate=$(date "+%s")
-  weeksSince=$(echo "scale=1; ($currentDate - $targetDate) / (86400 * 7)" | bc)
+  weeksSince=$(echo "($currentDate - $targetDate + 302400) / 604800" | bc)
   echo $weeksSince
 """
 
@@ -26,7 +26,7 @@ style: """
 """
 
 render: (output) ->
-  $weeksSince = parseFloat(output).toFixed(1)
+  $weeksSince = parseFloat(output)
   """
     <div id="countdown-container">
       ☃︎󠁧󠁿 #{$weeksSince} weeks
