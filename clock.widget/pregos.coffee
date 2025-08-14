@@ -1,9 +1,9 @@
 # Übersicht widget to count days until a specific date
 command: """
-  targetDate=$(date -j -f "%Y-%m-%d" "2024-11-04" "+%s") # Replace with your target date
+  targetDate=$(date -j -f "%Y-%m-%d" "2025-06-02" "+%s") # Replace with your target date
   currentDate=$(date "+%s")
-  weeksSince=$(echo "($currentDate - $targetDate + 302400) / 604800" | bc)
-  echo $weeksSince
+  daysUntil=$(( ($currentDate - $targetDate) / 86400 ))
+  echo $daysUntil
 """
 
 refreshFrequency: 1000 * 60 * 60 * 12 # Refresh once every day
@@ -26,9 +26,9 @@ style: """
 """
 
 render: (output) ->
-  $weeksSince = parseFloat(output)
+  $daysUntil = parseFloat(output)
   """
     <div id="countdown-container">
-      ☃︎󠁧󠁿 #{$weeksSince} weeks
+      🐘 #{$daysUntil} Days Old
     </div>
   """

@@ -1,9 +1,9 @@
 # Übersicht widget to count days until a specific date
 command: """
-  targetDate=$(date -j -f "%Y-%m-%d" "2025-08-12" "+%s") # Replace with your target date
+  targetDate=$(date -j -f "%Y-%m-%d" "2025-08-10" "+%s") # Replace with your target date
   currentDate=$(date "+%s")
-  daysSince=$(( ($currentDate - $targetDate) / 86400 ))
-  echo $daysSince
+  weeksLeft=$(echo "scale=1; ($currentDate - $targetDate) / (86400 * 7)" | bc)
+  echo $weeksLeft
 """
 
 refreshFrequency: 1000 * 60 * 60 * 12 # Refresh once every day
@@ -12,7 +12,7 @@ style: """
   #countdown-container {
     position: relative;
     margin-left: 25px;
-    margin-top: 385px;
+    margin-top: 297px;
     background-color: black;
     border-radius: 8px;
     border: 2px solid grey;
@@ -26,9 +26,9 @@ style: """
 """
 
 render: (output) ->
-  [daysSince] = output.split(',').map(Number)
+  [weeksLeft] = output.split(',').map(Number)
   """
     <div id="countdown-container">
-      🩼󠁮󠁧󠁿 #{daysSince} Days
+      🐘 #{weeksLeft} Weeks
     </div>
   """
