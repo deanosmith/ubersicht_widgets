@@ -29,6 +29,6 @@ render: (output) ->
   [weeksLeft] = output.split(',').map(Number)
   """
     <div id="countdown-container">
-      🐘 #{weeksLeft} Weeks
+      👶 #{weeksLeft} Weeks
     </div>
   """
