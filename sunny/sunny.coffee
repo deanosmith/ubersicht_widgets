@@ -4,27 +4,35 @@ import datetime
 import requests
 from zoneinfo import ZoneInfo
 
-# Copenhagen coordinates
-lat = 55.6761
-lng = 12.5683
+try:
+    # Copenhagen coordinates
+    lat = 55.6761
+    lng = 12.5683
 
-# Get current date in YYYY-MM-DD format
-current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+    # Get current date in YYYY-MM-DD format
+    current_date = datetime.datetime.now().strftime("%Y-%m-%d")
 
-# Fetch sunrise and sunset times from Sunrise-Sunset.org API
-response = requests.get(f"https://api.sunrise-sunset.org/json?lat={lat}&lng={lng}&date={current_date}&formatted=0")
-data = response.json()["results"]
+    # Fetch sunrise and sunset times from Sunrise-Sunset.org API
+    response = requests.get(
+        f"https://api.sunrise-sunset.org/json?lat={lat}&lng={lng}&date={current_date}&formatted=0",
+        timeout=10,
+    )
+    response.raise_for_status()
 
-# Parse UTC times
-sunrise_utc = datetime.datetime.fromisoformat(data["sunrise"])
-sunset_utc = datetime.datetime.fromisoformat(data["sunset"])
+    data = response.json()["results"]
 
-# Convert UTC times to Copenhagen local time
-sunrise_local = sunrise_utc.astimezone(ZoneInfo("Europe/Copenhagen"))
-sunset_local = sunset_utc.astimezone(ZoneInfo("Europe/Copenhagen"))
+    # Parse UTC times
+    sunrise_utc = datetime.datetime.fromisoformat(data["sunrise"])
+    sunset_utc = datetime.datetime.fromisoformat(data["sunset"])
 
-# Print times in 12-hour format without AM/PM
-print(sunrise_local.strftime("%I:%M"), sunset_local.strftime("%I:%M"))
+    # Convert UTC times to Copenhagen local time
+    sunrise_local = sunrise_utc.astimezone(ZoneInfo("Europe/Copenhagen"))
+    sunset_local = sunset_utc.astimezone(ZoneInfo("Europe/Copenhagen"))
+
+    # Print times in 12-hour format without AM/PM
+    print(sunrise_local.strftime("%I:%M"), sunset_local.strftime("%I:%M"))
+except Exception:
+    print("Loading Error")
   '
 """
 
@@ -48,7 +56,20 @@ style: """
 """
 
 render: (output) ->
-  times = output.split(" ")
+  cleaned = (output or "").trim()
+  return """
+    <div id="countdown-container">
+      Loading Error
+    </div>
+  """ if cleaned == "" or cleaned == "Loading Error"
+
+  times = cleaned.split(" ")
+  return """
+    <div id="countdown-container">
+      Loading Error
+    </div>
+  """ if times.length < 2
+
   sunrise = times[0]
   sunset = times[1]
   """

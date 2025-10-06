@@ -1,6 +1,6 @@
 # Übersicht widget to count days until a specific date
 command: """
-  targetDate=$(date -j -f "%Y-%m-%d" "2025-09-05" "+%s") # Replace with your target date
+  targetDate=$(date -j -f "%Y-%m-%d" "2025-12-23" "+%s") # Replace with your target date
   currentDate=$(date "+%s")
   daysLeft=$(( ($targetDate - $currentDate) / 86400 ))
   echo $daysLeft
@@ -29,6 +29,6 @@ render: (output) ->
   [daysLeft] = output.split(',').map(Number)
   """
     <div id="countdown-container">
-      🧑‍🧑‍🧒 #{daysLeft} Days
+      🎄 #{daysLeft} Days
     </div>
   """
