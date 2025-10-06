@@ -9,4 +9,4 @@
 * Sunrise & Sunset imes
 * Week counter
 * Day count down
-* Week cound down
+* Week count down
