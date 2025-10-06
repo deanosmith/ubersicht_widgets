@@ -9,4 +9,5 @@
 * Computer's Uptime
 * Sunrise & Sunset times
 * Days since counter
-* Weeks since counter count down
+* Weeks since counter
+* Days until counter
