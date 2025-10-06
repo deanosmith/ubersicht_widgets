@@ -1,7 +1,7 @@
 # Ubersicht Widgets
 
 ## Some simple and easily editable widgets for quick info
-![image](https://github.com/user-attachments/assets/e88b083b-9d8c-4246-82d7-7d4d64a4f021)
+<img width="257" height="436" alt="image" src="https://github.com/user-attachments/assets/ddb46210-7517-4a13-973a-52e79c175883" />
 
 ### In order:
 * Moon Cycle
