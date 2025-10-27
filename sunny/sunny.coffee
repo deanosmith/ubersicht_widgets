@@ -32,7 +32,7 @@ try:
     # Print times in 12-hour format without AM/PM
     print(sunrise_local.strftime("%I:%M"), sunset_local.strftime("%I:%M"))
 except Exception:
-    print("Loading Error")
+    print("🔴 Error 🔴")
   '
 """
 

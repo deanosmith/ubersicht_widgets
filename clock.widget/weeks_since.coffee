@@ -2,8 +2,9 @@
 command: """
   targetDate=$(date -j -f "%Y-%m-%d" "2025-08-10" "+%s") # Replace with your target date
   currentDate=$(date "+%s")
-  weeksLeft=$(echo "scale=1; ($currentDate - $targetDate) / (86400 * 7)" | bc)
-  echo $weeksLeft
+  daysSince=$(( ($currentDate - $targetDate) / 86400 ))
+  monthsSince=$(echo "scale=1; $daysSince / 30.44" | bc)
+  echo $monthsSince
 """
 
 refreshFrequency: 1000 * 60 * 60 * 12 # Refresh once every day
@@ -26,9 +27,9 @@ style: """
 """
 
 render: (output) ->
-  [weeksLeft] = output.split(',').map(Number)
+  monthsSince = parseFloat(output).toFixed(1)
   """
     <div id="countdown-container">
-      👶 #{weeksLeft} Weeks
+      🐘 #{monthsSince} Months
     </div>
   """
