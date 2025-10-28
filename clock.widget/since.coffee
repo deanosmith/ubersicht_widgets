@@ -1,19 +1,29 @@
 # Übersicht widget to count days until a specific date
 command: """
-  targetDate=$(date -j -f "%Y-%m-%d" "2025-08-10" "+%s") # Replace with your target date
+  targetDate=$(date -j -f "%Y-%m-%d" "2025-06-02" "+%s")
   currentDate=$(date "+%s")
   daysSince=$(( ($currentDate - $targetDate) / 86400 ))
-  monthsSince=$(echo "scale=1; $daysSince / 30.44" | bc)
-  echo $monthsSince
+  months=$(( $daysSince / 30 ))
+  remainingDays=$(( $daysSince % 30 - 1))
+  echo "$months.$remainingDays"
 """
 
 refreshFrequency: 1000 * 60 * 60 * 12 # Refresh once every day
+
+render: (output) ->
+  [months, days] = output.trim().split('.')
+  days = if days.length == 1 then "0#{days}" else days
+  """
+    <div id="countdown-container">
+      🐘 #{months}.#{days} Months
+    </div>
+  """
 
 style: """
   #countdown-container {
     position: relative;
     margin-left: 25px;
-    margin-top: 297px;
+    margin-top: 255px;
     background-color: black;
     border-radius: 8px;
     border: 2px solid grey;
@@ -25,11 +35,3 @@ style: """
     display: inline-block; /* Make the container size dynamic based on text */
   }
 """
-
-render: (output) ->
-  monthsSince = parseFloat(output).toFixed(1)
-  """
-    <div id="countdown-container">
-      🐘 #{monthsSince} Months
-    </div>
-  """
