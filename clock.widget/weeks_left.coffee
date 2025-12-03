@@ -1,18 +1,18 @@
-# Übersicht widget to count weeks since a specific date
+# Übersicht widget to count weeks until a specific date
 command: """
-  targetDate=$(date -j -f "%Y-%m-%d" "2025-05-11" "+%s") # Replace with your target date
+  targetDate=$(date -j -f "%Y-%m-%d" "2026-05-02" "+%s")
   currentDate=$(date "+%s")
-  weeksSince=$(echo "scale=1; ($currentDate - $targetDate) / (86400 * 7)" | bc)
-  echo $weeksSince
+  weeksLeft=$(echo "($targetDate - $currentDate) / (86400 * 7)" | bc)
+  echo $weeksLeft
 """
 
-refreshFrequency: 1000 * 60 * 60 * 12 # Refresh once every day
+refreshFrequency: 1000 * 60 * 60 * 12 # Refresh twice a day
 
 style: """
   #countdown-container {
     position: relative;
     margin-left: 25px;
-    margin-top: 390px;
+    margin-top: 430px;
     background-color: black;
     border-radius: 8px;
     border: 2px solid grey;
@@ -26,9 +26,9 @@ style: """
 """
 
 render: (output) ->
-  [weeksSince] = output.split(',').map(Number)
+  [weeksLeft] = output.split(',').map(Number)
   """
     <div id="countdown-container">
-      🧑‍🧑‍🧒 #{weeksSince} Weeks
+      🏁 #{weeksLeft} Weeks
     </div>
   """

@@ -2,7 +2,7 @@
 command: """
   targetDate=$(date -j -f "%Y-%m-%d" "2026-02-01" "+%s") # Replace with your target date
   currentDate=$(date "+%s")
-  daysLeft=$(( ($targetDate - $currentDate) / 86400 ))
+  daysLeft=$(( ($targetDate - $currentDate) / 86400 / 7 ))
   echo $daysLeft
 """
 
@@ -29,6 +29,6 @@ render: (output) ->
   [daysLeft] = output.split(',').map(Number)
   """
     <div id="countdown-container">
-      🇿🇦 #{daysLeft} Days
+      🏝️ #{daysLeft} Weeks
     </div>
   """

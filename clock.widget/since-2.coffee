@@ -3,8 +3,8 @@ command: """
   targetDate=$(date -j -f "%Y-%m-%d" "2025-08-10" "+%s")
   currentDate=$(date "+%s")
   daysSince=$(( ($currentDate - $targetDate) / 86400 ))
-  months=$(( $daysSince / 30 ))
-  remainingDays=$(( $daysSince % 30 - 1))
+  months=$(( $daysSince / 31 ))
+  remainingDays=$(( $daysSince % 31 + 1 ))
   echo "$months.$remainingDays"
 """
 
