@@ -85,7 +85,7 @@ export const render = ({ output }) => {
         <defs>
           {/* Blur filter for smooth transitions */}
           <filter id="blurFilter" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="20" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="1" />
           </filter>
 
           {/* Circular clipping path to contain blur within circle */}
@@ -112,67 +112,66 @@ export const render = ({ output }) => {
                 colors.push({ hour, color });
               };
 
-              // NIGHT COLORS - Deep darkness dominates winter
-              // Midnight (0:00)
-              addColor(0, '#0a1628');
-              addColor(1, '#0c1a2e');
-              addColor(2, '#0e1d34');
-              addColor(3, '#10203a');
-              addColor(4, '#122340');
-              addColor(5, '#142646');
-              addColor(6, '#16294c');
-              addColor(7, '#182c52');
+              // Pre-sunrise - subtle lightening
+              addColor(sunrise - 1, '#1a2646');
+              addColor(sunrise - 0.75, '#1c2848');
+              addColor(sunrise - 0.5, '#1e2a4a');
+              addColor(sunrise - 0.25, '#202c4e');
 
-              // Pre-sunrise transition (1 hour before)
-              const preSunrise = sunrise - 0.5;
-              addColor(preSunrise, '#1a2f58');
+              // SUNRISE - Vibrant orange period
+              addColor(sunrise, '#FF8C5A');
+              addColor(sunrise + 0.15, '#FF9864');
+              addColor(sunrise + 0.3, '#FFA46E');
+              addColor(sunrise + 0.45, '#FFB078');
+              addColor(sunrise + 0.6, '#FFBC82');
+              addColor(sunrise + 0.75, '#FFC88C');
 
-              // SUNRISE - Brief orange/golden period
-              addColor(sunrise, '#FF8C5A');           // Sunrise orange
-              addColor(sunrise + 0.25, '#FFA070');
-              addColor(sunrise + 0.5, '#FFB488');
+              // Morning golden hour to day transition
+              addColor(sunrise + 1, '#EDD096');
+              addColor(sunrise + 1.25, '#DCD8A0');
+              addColor(sunrise + 1.5, '#CBE0AA');
+              addColor(sunrise + 1.75, '#BAE8B4');
 
-              // Morning - transition to day
-              addColor(sunrise + 1, '#D4C896');
-              addColor(sunrise + 1.5, '#B0D4AA');
+              // Mid-morning - transition to blue
+              addColor(9.5, '#A8E0BE');
+              addColor(10, '#96D8C8');
+              addColor(10.5, '#8AD0D2');
+              addColor(11, '#88C8DC');
+              addColor(11.5, '#87C9E3');
 
-              // Mid-morning to noon
-              addColor(10, '#90C8D0');
-              addColor(11, '#88C6DD');
+              // NOON - Peak bright blue
+              addColor(12, '#87cfeb');
+              addColor(12.5, '#88CCE9');
+              addColor(13, '#89CAE7');
+              addColor(13.5, '#8BC8E5');
 
-              // NOON - Peak daylight (bright blue)
-              addColor(12, '#87CEEB');
-              addColor(13, '#88CAE8');
+              // Afternoon - maintaining brightness
+              addColor(14, '#8DC6E3');
+              addColor(14.5, '#90C4E0');
 
-              // Afternoon
-              addColor(14, '#90C0E0');
+              // Pre-sunset - warming up
+              addColor(sunset - 1, '#95BCDC');
+              addColor(sunset - 0.75, '#9CB4D8');
+              addColor(sunset - 0.5, '#A4ACD4');
+              addColor(sunset - 0.25, '#ACA4D0');
 
-              // Pre-sunset transition
-              const preSunset = sunset - 0.5;
-              addColor(preSunset, '#A8AACC');
+              // SUNSET - Pink/purple peak
+              addColor(sunset, '#FF9AD0');
+              addColor(sunset + 0.15, '#F496CA');
+              addColor(sunset + 0.3, '#E992C4');
+              addColor(sunset + 0.45, '#DE8EBE');
+              addColor(sunset + 0.6, '#D38AB8');
 
-              // SUNSET - Pink/purple/orange
-              addColor(sunset, '#FF9AD0');            // Sunset pink
-              addColor(sunset + 0.25, '#E090C0');
-              addColor(sunset + 0.5, '#C088B0');
-
-              // Dusk - quick transition to night
-              addColor(sunset + 1, '#6B5B88');
-              addColor(sunset + 1.5, '#453d68');
-              addColor(sunset + 2, '#2f3050');
-
-              // Back to deep night
-              addColor(18, '#1e2642');
-              addColor(19, '#1a2438');
-              addColor(20, '#16222e');
-              addColor(21, '#142028');
-              addColor(22, '#121e24');
-              addColor(23, '#101c22');
-              addColor(24, '#0a1628');
+              // Dusk - transitioning to night
+              addColor(sunset + 0.8, '#C086B2');
+              addColor(sunset + 1, '#AD7CA0');
+              addColor(sunset + 1.25, '#9A72A0');
+              addColor(sunset + 1.5, '#876896');
+              addColor(sunset + 1.75, '#745E8C');
+              addColor(sunset + 2, '#615482');
 
               // Sort by hour
               colors.sort((a, b) => a.hour - b.hour);
-
 
               return colors;
             };
