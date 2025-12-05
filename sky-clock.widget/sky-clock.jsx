@@ -1,20 +1,29 @@
 // Sky Clock Widget for Übersicht
 // A visual 24-hour clock with sky colors representing time of day
 
-// No need to refresh - this is a static visual representation
-export const refreshFrequency = false;
+// Refresh every 10 seconds for testing (change to 24 * 60 * 60 * 1000 for production)
+export const refreshFrequency = 10 * 1000; // 10 seconds for testing
 
 // Fetch sunrise and sunset times for Copenhagen
 export const command = `
 python3 -c '
 import datetime
+import json
 import requests
 from zoneinfo import ZoneInfo
 
 try:
+    # Select location (uncomment the one you want to use)
+    
     # Copenhagen coordinates
     lat = 55.6761
     lng = 12.5683
+    timezone = "Europe/Copenhagen"
+    
+    # Sydney coordinates (uncomment to use)
+    #lat = -33.8688
+    #lng = 151.2093
+    #timezone = "Australia/Sydney"
 
     # Get current date in YYYY-MM-DD format
     current_date = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -28,21 +37,27 @@ try:
 
     data = response.json()["results"]
 
-    # Parse UTC times
+    # Parse UTC times and convert to local timezone
     sunrise_utc = datetime.datetime.fromisoformat(data["sunrise"])
     sunset_utc = datetime.datetime.fromisoformat(data["sunset"])
     
-    sunrise_local = sunrise_utc.astimezone(ZoneInfo("Europe/Copenhagen"))
-    sunset_local = sunset_utc.astimezone(ZoneInfo("Europe/Copenhagen"))
+    sunrise_local = sunrise_utc.astimezone(ZoneInfo(timezone))
+    sunset_local = sunset_utc.astimezone(ZoneInfo(timezone))
     
     # Output as decimal hours (e.g., 8.5 for 8:30)
     sunrise_hour = sunrise_local.hour + sunrise_local.minute / 60.0
     sunset_hour = sunset_local.hour + sunset_local.minute / 60.0
     
-    print(json.dumps({"sunrise": sunrise_hour, "sunset": sunset_hour}))
+    # Debug output
+    import sys
+    print(f"Location: ({lat}, {lng}), Sunrise: {sunrise_local.strftime('%H:%M')}, Sunset: {sunset_local.strftime('%H:%M')}", file=sys.stderr)
+    
+    print(json.dumps({"sunrise": sunrise_hour, "sunset": sunset_hour, "location": f"({lat}, {lng})", "sunrise_time": sunrise_local.strftime("%H:%M"), "sunset_time": sunset_local.strftime("%H:%M")}))
 except Exception as e:
+    import sys
+    print(f"Error: {e}", file=sys.stderr)
     # Default values if API fails (winter in Copenhagen)
-    print(json.dumps({"sunrise": 8.5, "sunset": 15.5}))
+    print(json.dumps({"sunrise": 8.5, "sunset": 15.5, "error": str(e)}))
 '
 `;
 
@@ -74,10 +89,13 @@ export const render = ({ output }) => {
       sunTimes = JSON.parse(output.trim());
     }
   } catch (e) {
-    // Use defaults
+    console.error("Failed to parse sunrise/sunset data:", e);
   }
 
   const { sunrise, sunset } = sunTimes;
+
+  // Debug output to console
+  console.log("Sunrise:", sunrise, "Sunset:", sunset, "Data:", sunTimes);
 
   return (
     <div className="clock-container">
@@ -112,11 +130,23 @@ export const render = ({ output }) => {
                 colors.push({ hour, color });
               };
 
-              // Pre-sunrise - subtle lightening
-              addColor(sunrise - 1, '#1a2646');
-              addColor(sunrise - 0.75, '#1c2848');
-              addColor(sunrise - 0.5, '#1e2a4a');
-              addColor(sunrise - 0.25, '#202c4e');
+              // Calculate noon as midpoint between sunrise and sunset
+              const noon = (sunrise + sunset) / 2;
+
+              // Calculate the daylight duration
+              const daylightDuration = sunset - sunrise;
+
+              // NIGHT - Start at hour 0 (midnight)
+              // addColor(0, '#0a1628');
+
+              // Continue deep night until well before sunrise
+              // Only add pre-sunrise colors in the last 30 minutes before sunrise
+              if (sunrise > 0.5) {
+                addColor(sunrise - 0.5, '#0a1628');
+              }
+
+              // Very subtle pre-dawn lightening (only 15 min before sunrise)
+              addColor(sunrise - 0.25, '#1a2646');
 
               // SUNRISE - Vibrant orange period
               addColor(sunrise, '#FF8C5A');
@@ -128,32 +158,47 @@ export const render = ({ output }) => {
 
               // Morning golden hour to day transition
               addColor(sunrise + 1, '#EDD096');
-              addColor(sunrise + 1.25, '#DCD8A0');
-              // addColor(sunrise + 1.5, '#CBE0AA');
-              // addColor(sunrise + 1.75, '#BAE8B4');
+              addColor(sunrise + 1.5, '#DCD8A0');
 
-              // Mid-morning - transition to blue
-              // addColor(9.5, '#A8E0BE');
-              addColor(10, '#96D8C8');
-              addColor(10.5, '#8AD0D2');
-              addColor(11, '#88C8DC');
-              addColor(11.5, '#87C9E3');
+              // Mid-morning - transition to blue (25% through the day)
+              const morningMid = sunrise + daylightDuration * 0.25;
+              addColor(morningMid, '#96D8C8');
+              addColor(morningMid + 0.5, '#8AD0D2');
 
-              // NOON - Peak bright blue
-              addColor(12, '#87CEEB');
-              addColor(12.5, '#88CCE9');
-              addColor(13, '#89CAE7');
-              addColor(13.5, '#8BC8E5');
+              // Late morning (40% through the day)
+              const lateMorning = sunrise + daylightDuration * 0.4;
+              addColor(lateMorning, '#88C8DC');
+              addColor(lateMorning + 0.25, '#87C9E3');
 
-              // Afternoon - maintaining brightness
-              addColor(14, '#8DC6E3');
-              addColor(14.5, '#90C4E0');
+              // NOON - Peak bright blue (solar noon, 50% through the day)
+              addColor(noon - 0.5, '#87CEEB');
+              addColor(noon, '#87CEEB');
+              addColor(noon + 0.5, '#88CCE9');
 
-              // Pre-sunset - warming up
-              // addColor(sunset - 1, '#95BCDC');
-              // addColor(sunset - 0.75, '#9CB4D8');
-              // addColor(sunset - 0.5, '#A4ACD4');
-              addColor(sunset - 0.25, '#ACA4D0');
+              // Early afternoon (60% through the day)
+              const earlyAfternoon = sunrise + daylightDuration * 0.6;
+              addColor(earlyAfternoon - 0.25, '#89CAE7');
+              addColor(earlyAfternoon, '#8BC8E5');
+
+              // Mid afternoon (75% through the day) - still bright
+              const midAfternoon = sunrise + daylightDuration * 0.75;
+              addColor(midAfternoon, '#8DC6E3');
+
+              // Late afternoon (80% through the day) - beginning to warm
+              const lateAfternoon80 = sunrise + daylightDuration * 0.80;
+              addColor(lateAfternoon80, '#90C0DC');
+
+              // Late afternoon (85% through the day) - warming more
+              const lateAfternoon85 = sunrise + daylightDuration * 0.85;
+              addColor(lateAfternoon85, '#94BAD8');
+
+              // Very late afternoon (90% through the day) - transitioning to sunset colors
+              const lateAfternoon90 = sunrise + daylightDuration * 0.90;
+              addColor(lateAfternoon90, '#98B4D4');
+
+              // Pre-sunset (95% through the day) - warming up significantly
+              const preSunset95 = sunrise + daylightDuration * 0.95;
+              addColor(preSunset95, '#A0ACD2');
 
               // SUNSET - Pink/purple peak
               addColor(sunset, '#FF9AD0');
@@ -162,13 +207,22 @@ export const render = ({ output }) => {
               addColor(sunset + 0.45, '#DE8EBE');
               addColor(sunset + 0.6, '#D38AB8');
 
-              // Dusk - transitioning to night
-              // addColor(sunset + 0.8, '#C086B2');
-              // addColor(sunset + 1, '#AD7CA0');
-              // addColor(sunset + 1.25, '#9A72A0');
-              // addColor(sunset + 1.5, '#876896');
-              // addColor(sunset + 1.75, '#745E8C');
-              // addColor(sunset + 2, '#615482');
+              // Brief dusk transition (only ~1 hour after sunset)
+              addColor(sunset + 0.75, '#C086B2');
+              addColor(sunset + 1, '#9A6E96');
+
+              // Transition to deep night quickly after dusk
+              addColor(sunset + 1.5, '#4e466e');
+              addColor(sunset + 2, '#3b3c64');
+              addColor(sunset + 2.5, '#1a2646');
+
+              // Deep night until midnight or beyond
+              if (sunset + 3 < 24) {
+                addColor(sunset + 3, '#0a1628');
+              }
+
+              // Ensure we have color at hour 24 to complete the cycle
+              // addColor(24, '#0a1628');
 
               // Sort by hour
               colors.sort((a, b) => a.hour - b.hour);
@@ -253,6 +307,52 @@ export const render = ({ output }) => {
             </text>
           );
         })}
+
+        {/* Sunrise marker */}
+        {/* {(() => {
+          const sunriseAngle = ((sunrise - 12) * 15 - 90) * (Math.PI / 180);
+          const x = 250 + 220 * Math.cos(sunriseAngle);
+          const y = 250 + 220 * Math.sin(sunriseAngle);
+          return (
+            <g>
+              <circle cx={x} cy={y} r="4" fill="#FF8C5A" stroke="white" strokeWidth="1" />
+              <text
+                x={x}
+                y={y - 12}
+                textAnchor="middle"
+                fontSize="11"
+                fill="white"
+                fontWeight="500"
+                style={{ textShadow: '0 1px 4px rgba(0, 0, 0, 0.9)' }}
+              >
+                ☀️ {sunrise.toFixed(1)}
+              </text>
+            </g>
+          );
+        })()} */}
+
+        {/* Sunset marker */}
+        {/* {(() => {
+          const sunsetAngle = ((sunset - 12) * 15 - 90) * (Math.PI / 180);
+          const x = 250 + 220 * Math.cos(sunsetAngle);
+          const y = 250 + 220 * Math.sin(sunsetAngle);
+          return (
+            <g>
+              <circle cx={x} cy={y} r="4" fill="#FF9AD0" stroke="white" strokeWidth="1" />
+              <text
+                x={x}
+                y={y - 12}
+                textAnchor="middle"
+                fontSize="11"
+                fill="white"
+                fontWeight="500"
+                style={{ textShadow: '0 1px 4px rgba(0, 0, 0, 0.9)' }}
+              >
+                🌙 {sunset.toFixed(1)}
+              </text>
+            </g>
+          );
+        })()} */}
       </svg>
     </div>
   );
