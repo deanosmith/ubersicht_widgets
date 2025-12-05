@@ -85,7 +85,7 @@ export const render = ({ output }) => {
         <defs>
           {/* Blur filter for smooth transitions */}
           <filter id="blurFilter" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="1" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="15" />
           </filter>
 
           {/* Circular clipping path to contain blur within circle */}
@@ -129,18 +129,18 @@ export const render = ({ output }) => {
               // Morning golden hour to day transition
               addColor(sunrise + 1, '#EDD096');
               addColor(sunrise + 1.25, '#DCD8A0');
-              addColor(sunrise + 1.5, '#CBE0AA');
-              addColor(sunrise + 1.75, '#BAE8B4');
+              // addColor(sunrise + 1.5, '#CBE0AA');
+              // addColor(sunrise + 1.75, '#BAE8B4');
 
               // Mid-morning - transition to blue
-              addColor(9.5, '#A8E0BE');
+              // addColor(9.5, '#A8E0BE');
               addColor(10, '#96D8C8');
               addColor(10.5, '#8AD0D2');
               addColor(11, '#88C8DC');
               addColor(11.5, '#87C9E3');
 
               // NOON - Peak bright blue
-              addColor(12, '#87cfeb');
+              addColor(12, '#87CEEB');
               addColor(12.5, '#88CCE9');
               addColor(13, '#89CAE7');
               addColor(13.5, '#8BC8E5');
@@ -150,9 +150,9 @@ export const render = ({ output }) => {
               addColor(14.5, '#90C4E0');
 
               // Pre-sunset - warming up
-              addColor(sunset - 1, '#95BCDC');
-              addColor(sunset - 0.75, '#9CB4D8');
-              addColor(sunset - 0.5, '#A4ACD4');
+              // addColor(sunset - 1, '#95BCDC');
+              // addColor(sunset - 0.75, '#9CB4D8');
+              // addColor(sunset - 0.5, '#A4ACD4');
               addColor(sunset - 0.25, '#ACA4D0');
 
               // SUNSET - Pink/purple peak
@@ -163,12 +163,12 @@ export const render = ({ output }) => {
               addColor(sunset + 0.6, '#D38AB8');
 
               // Dusk - transitioning to night
-              addColor(sunset + 0.8, '#C086B2');
-              addColor(sunset + 1, '#AD7CA0');
-              addColor(sunset + 1.25, '#9A72A0');
-              addColor(sunset + 1.5, '#876896');
-              addColor(sunset + 1.75, '#745E8C');
-              addColor(sunset + 2, '#615482');
+              // addColor(sunset + 0.8, '#C086B2');
+              // addColor(sunset + 1, '#AD7CA0');
+              // addColor(sunset + 1.25, '#9A72A0');
+              // addColor(sunset + 1.5, '#876896');
+              // addColor(sunset + 1.75, '#745E8C');
+              // addColor(sunset + 2, '#615482');
 
               // Sort by hour
               colors.sort((a, b) => a.hour - b.hour);
@@ -184,8 +184,10 @@ export const render = ({ output }) => {
               const next = hourColors[i + 1];
 
               // Convert hour to angle (12 at top = -90°, then clockwise)
-              const currentAngle = ((current.hour - 12) * 15 - 90) * (Math.PI / 180);
-              const nextAngle = ((next.hour - 12) * 15 - 90) * (Math.PI / 180);
+              // Add small overlap to prevent gaps between segments
+              const overlapDegrees = 1; // Small overlap in degrees
+              const currentAngle = ((current.hour - 12) * 15 - 90 - overlapDegrees) * (Math.PI / 180);
+              const nextAngle = ((next.hour - 12) * 15 - 90 + overlapDegrees) * (Math.PI / 180);
 
               const x1 = 250 + 245 * Math.cos(currentAngle);
               const y1 = 250 + 245 * Math.sin(currentAngle);
