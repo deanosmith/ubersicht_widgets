@@ -64,7 +64,7 @@ except Exception as e:
 // Widget styling
 export const className = `
   left: 10%;
-  top: 85%;
+  top: 80%;
   transform: translate(-50%, -50%);
   
   .clock-container {
