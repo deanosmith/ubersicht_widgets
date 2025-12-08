@@ -105,8 +105,6 @@ export const render = ({ output }) => {
 
       {/* Layer 2: Sky Conic Gradient (with blur) */}
       {(() => {
-        // Generate hour colors dynamically based on sunrise/sunset
-        // Note: Logic preserved from previous step to ensure smooth gradient
         const generateHourColors = () => {
           const colors = [];
           const addColor = (hour, color) => colors.push({ hour, color });
@@ -120,55 +118,36 @@ export const render = ({ output }) => {
 
           const noon = (sunrise + sunset) / 2;
 
-          // --- SUNRISE WINDOW [sunrise - 0.5, sunrise + 0.5] ---
-          // Distribute the warm sunrise colors within this 1-hour window
-          addColor(sunriseStart - .3, '#ff8c5a2f'); // Fade in start
-          addColor(sunriseStart, '#ff8c5a70'); // Fade in start
+          addColor(sunriseStart - .3, '#ff8c5a2f');
           addColor(sunriseStart + 0.1, '#ff8c5a72');
           addColor(sunriseStart + 0.2, '#ff9864cb');
           addColor(sunriseStart + 0.3, '#FFA46E');
           addColor(sunriseStart + 0.4, '#FFB078');
-          // addColor(sunrise, '#FFBC82'); // Actual sunrise time
+          // addColor(sunrise, '#FFBC82');
           // addColor(sunrise + 0.1, '#FFC88C');
           // addColor(sunrise + 0.2, '#EDD096');
           // addColor(sunrise + 0.3, '#dcc4a0ff');
           // addColor(sunrise + 0.4, '#dcc4a0ff');
-          // addColor(sunriseEnd, '#96c1d8ff'); // Transition to blue at end of window
+          // addColor(sunriseEnd, '#96c1d8ff');
 
-          // --- DAY WINDOW [sunrise + 0.5, sunset - 0.5] ---
-          // Natural sky blue palette between the events
-
-          // We lay out a few points to maintain the gradient structure and "noon" brightness
-          // Start of day proper
           const dayDuration = sunsetStart - sunriseEnd;
           const dayStart = sunriseEnd;
 
           // Add a few interpolation points for the blue sky
-          addColor(dayStart + dayDuration * 0.2, '#8AD0D2');
-          addColor(dayStart + dayDuration * 0.5, '#87CEEB'); // Peak noonish color (can align with actual noon if within window)
-          // Ensure noon is exactly represented if it falls nicely in the middle (it usually does)
-          // But strict noon alignment isn't as critical as the smooth blue wash requested.
-          // Let's explicitly add the noon color at the actual solar noon if it's inside this window (it technically must be)
+          addColor(dayStart + dayDuration * 0.2, '#4cc6ffff');
+          addColor(dayStart + dayDuration * 0.5, '#4cc6ffff');
           if (noon > sunriseEnd && noon < sunsetStart) {
-            addColor(noon, '#87CEEB');
+            addColor(noon, '#4cc6ffff');
           }
 
-          addColor(dayStart + dayDuration * 0.8, '#88CCE9');
+          addColor(dayStart + dayDuration * 0.8, '#4cc6ffff');
 
-          // --- SUNSET WINDOW [sunset - 0.5, sunset + 0.5] ---
-          // Distribute sunset colors within this 1-hour window
-          const sunsetWindowDuration = 1.0;
-          // We can just step through relative to sunsetStart
-          // addColor(sunset - 0.5, '#e992c4ff');
-          // addColor(sunset - 0.3, '#e992c4ff');
-          // addColor(sunset - 0.2, '#e992c4ff');
-          // addColor(sunset - 0.1, '#e992c4ff');
           addColor(sunset, '#ff9cc8ff');
           addColor(sunset + 0.1, '#ff6caeff');
-          addColor(sunset + 0.2, '#ff6caec1');// SUNSET HAND
-          addColor(sunset + 0.4, '#ff6cae7c');
-          // addColor(sunset + 0.5, '#ff6caeff');
-          // End of light
+          addColor(sunset + 0.2, '#ff6cae9f');
+          addColor(sunset + 0.4, '#ff6cae38');
+          addColor(sunset + 0.5, '#ff6cae49');
+          addColor(sunset + 0.6, '#ff6cae2e');
 
           colors.sort((a, b) => a.hour - b.hour);
           return colors;
@@ -183,11 +162,11 @@ export const render = ({ output }) => {
         return (
           <div style={{
             position: 'absolute',
-            top: '1%', left: '1%', width: '98%', height: '98%',
+            top: '2%', left: '0%', width: '100%', height: '100%',
             borderRadius: '100%',
             background: gradient,
             filter: 'blur(5px)', // Heavy blur for sky atmosphere
-            transform: 'scale(1.0)', // Slight scale to handle blur edges if needed
+            // transform: 'scale(1.0)', // Slight scale to handle blur edges if needed
             zIndex: 1
           }} />
         );
@@ -243,40 +222,61 @@ export const render = ({ output }) => {
         })()}
 
 
-        {/* Hour labels - 12, 18, 24, 6 at cardinal positions */}
-        {[
-          { hour: 12, angle: -90 },    // Top (noon)
-          { hour: 18, angle: 0 },      // Right (6pm sunset)
-          { hour: 24, angle: 90 },     // Bottom (midnight)
-          { hour: 6, angle: 180 },     // Left (6am sunrise)
-        ].map(({ hour, angle }) => {
-          const rad = angle * (Math.PI / 180);
-          const x = 250 + 195 * Math.cos(rad);
-          const y = 250 + 195 * Math.sin(rad);
+        {/* Hour markers and ticks */}
+        {Array.from({ length: 24 }).map((_, i) => {
+          const hour = i + 1; // 1 to 24
+          const angleDeg = (hour - 12) * 15 - 90;
+          const rad = angleDeg * (Math.PI / 180);
+
+          // Tick geometry
+          // Outer radius is ~245 (clip is 245)
+          const tickInnerR = 235;
+          const tickOuterR = 245;
+
+          const x1 = 250 + tickInnerR * Math.cos(rad);
+          const y1 = 250 + tickInnerR * Math.sin(rad);
+          const x2 = 250 + tickOuterR * Math.cos(rad);
+          const y2 = 250 + tickOuterR * Math.sin(rad);
+
+          // Label geometry
+          const labelR = 220;
+          const lx = 250 + labelR * Math.cos(rad);
+          const ly = 250 + labelR * Math.sin(rad);
 
           return (
-            <text
-              key={`label-${hour}`}
-              x={x}
-              y={y}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fill="white"
-              fontSize="28"
-              fontWeight="100"
-              fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-            // style={{
-            // textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)',
-            // opacity: 1
-            // }}
-            >
-              {hour}
-            </text>
+            <g key={`marker-${hour}`}>
+              {/* Tick Mark */}
+              <line
+                x1={x1} y1={y1}
+                x2={x2} y2={y2}
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                opacity="0.8"
+              />
+
+              {/* Label (Even hours only) */}
+              {hour % 2 === 0 && (
+                <text
+                  x={lx}
+                  y={ly}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fill="white"
+                  fontSize="22"
+                  fontWeight="00"
+                  fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+                  style={{ opacity: 0.9 }}
+                >
+                  {hour}
+                </text>
+              )}
+            </g>
           );
         })}
 
-        {/* Sunrise hand and tick */}
-        {(() => {
+        {/* Sunrise & Sunset Hands */}
+        {/* {(() => {
           const sunriseAngle = ((sunrise - 12) * 15 - 90) * (Math.PI / 180);
 
           // Hand (Black line) from center to tick start
@@ -291,7 +291,6 @@ export const render = ({ output }) => {
 
           return (
             <g>
-              {/* Black Hand */}
               <line
                 x1={xStart}
                 y1={yStart}
@@ -301,7 +300,6 @@ export const render = ({ output }) => {
                 strokeWidth="4"
                 strokeLinecap="round"
               />
-              {/* White Tick */}
               <line
                 x1={xEndHand}
                 y1={yEndHand}
@@ -314,8 +312,6 @@ export const render = ({ output }) => {
             </g>
           );
         })()}
-
-        {/* Sunset hand and tick */}
         {(() => {
           const sunsetAngle = ((sunset - 12) * 15 - 90) * (Math.PI / 180);
 
@@ -331,7 +327,6 @@ export const render = ({ output }) => {
 
           return (
             <g>
-              {/* Black Hand */}
               <line
                 x1={xStart}
                 y1={yStart}
@@ -341,7 +336,6 @@ export const render = ({ output }) => {
                 strokeWidth="4"
                 strokeLinecap="round"
               />
-              {/* White Tick */}
               <line
                 x1={xEndHand}
                 y1={yEndHand}
@@ -353,7 +347,7 @@ export const render = ({ output }) => {
               />
             </g>
           );
-        })()}
+        })()} */}
       </svg>
     </div>
   );
