@@ -122,16 +122,18 @@ export const render = ({ output }) => {
 
           // --- SUNRISE WINDOW [sunrise - 0.5, sunrise + 0.5] ---
           // Distribute the warm sunrise colors within this 1-hour window
-          addColor(sunriseStart, '#ff8c5a9e'); // Fade in start
-          addColor(sunriseStart + 0.1, '#FF8C5A');
-          addColor(sunriseStart + 0.2, '#FF9864');
+          addColor(sunriseStart - .3, '#ff8c5a2f'); // Fade in start
+          addColor(sunriseStart, '#ff8c5a70'); // Fade in start
+          addColor(sunriseStart + 0.1, '#ff8c5a72');
+          addColor(sunriseStart + 0.2, '#ff9864cb');
           addColor(sunriseStart + 0.3, '#FFA46E');
           addColor(sunriseStart + 0.4, '#FFB078');
-          addColor(sunrise, '#FFBC82'); // Actual sunrise time
-          addColor(sunrise + 0.1, '#FFC88C');
-          addColor(sunrise + 0.2, '#EDD096');
-          addColor(sunrise + 0.3, '#dcc4a0ff');
-          addColor(sunriseEnd, '#96c1d8ff'); // Transition to blue at end of window
+          // addColor(sunrise, '#FFBC82'); // Actual sunrise time
+          // addColor(sunrise + 0.1, '#FFC88C');
+          // addColor(sunrise + 0.2, '#EDD096');
+          // addColor(sunrise + 0.3, '#dcc4a0ff');
+          // addColor(sunrise + 0.4, '#dcc4a0ff');
+          // addColor(sunriseEnd, '#96c1d8ff'); // Transition to blue at end of window
 
           // --- DAY WINDOW [sunrise + 0.5, sunset - 0.5] ---
           // Natural sky blue palette between the events
@@ -152,18 +154,20 @@ export const render = ({ output }) => {
           }
 
           addColor(dayStart + dayDuration * 0.8, '#88CCE9');
-          addColor(sunsetStart, '#98B4D4'); // Transition to evening before sunset window
 
           // --- SUNSET WINDOW [sunset - 0.5, sunset + 0.5] ---
           // Distribute sunset colors within this 1-hour window
           const sunsetWindowDuration = 1.0;
           // We can just step through relative to sunsetStart
-          addColor(sunsetStart + 0.1, '#A0ACD2');
-          addColor(sunsetStart + 0.3, '#FF9AD0');
-          addColor(sunset, '#F496CA'); // Actual sunset time
-          addColor(sunset + 0.1, '#E992C4');
-          addColor(sunset + 0.2, '#DE8EBE');
-          addColor(sunset + 0.3, '#d38ab8ff');
+          // addColor(sunset - 0.5, '#e992c4ff');
+          // addColor(sunset - 0.3, '#e992c4ff');
+          // addColor(sunset - 0.2, '#e992c4ff');
+          // addColor(sunset - 0.1, '#e992c4ff');
+          addColor(sunset, '#ff9cc8ff');
+          addColor(sunset + 0.1, '#ff6caeff');
+          addColor(sunset + 0.2, '#ff6caec1');// SUNSET HAND
+          addColor(sunset + 0.4, '#ff6cae7c');
+          // addColor(sunset + 0.5, '#ff6caeff');
           // End of light
 
           colors.sort((a, b) => a.hour - b.hour);
@@ -258,13 +262,13 @@ export const render = ({ output }) => {
               textAnchor="middle"
               dominantBaseline="middle"
               fill="white"
-              fontSize="24"
-              fontWeight="600"
+              fontSize="28"
+              fontWeight="100"
               fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-              style={{
-                textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)',
-                opacity: 1
-              }}
+            // style={{
+            // textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)',
+            // opacity: 1
+            // }}
             >
               {hour}
             </text>
