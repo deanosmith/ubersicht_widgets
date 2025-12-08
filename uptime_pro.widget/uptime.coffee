@@ -11,7 +11,7 @@ theme       = 'color'                                                   #
 style       = 'min'                                                     #
 #                                                                       #
 # POSITION WIDGET ON SCREEN                                             #
-pos_top     = '155px'                                                   #
+pos_top     = '153px'                                                   #
 pos_left    = '25px'                                                    #
 #                                                                       #
 #-----------------------------------------------------------------------#
