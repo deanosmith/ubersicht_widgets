@@ -15,6 +15,7 @@
 
 ## New Sky Clock Widget
 
+Dynamic sky clockface that displays the approx sky colour based on the user's location.
 <img width="282" height="272" alt="image" src="https://github.com/user-attachments/assets/43a3848e-2564-45f0-9088-fb3ce04e5e80" />
 
 Inspiration from: https://x.com/soggyburritowu/status/1985759647244902651?s=20
