@@ -111,56 +111,60 @@ export const render = ({ output }) => {
           const colors = [];
           const addColor = (hour, color) => colors.push({ hour, color });
 
-          const daylightDuration = sunset - sunrise;
+          // Define windows (30 mins = 0.5 hours)
+          const sunriseStart = sunrise - 0.5;
+          const sunriseEnd = sunrise + 0.5;
+
+          const sunsetStart = sunset - 0.5;
+          const sunsetEnd = sunset + 0.5;
+
           const noon = (sunrise + sunset) / 2;
 
-          // Pre-dawn
-          addColor(sunrise * .9, '#ff8c5a9e');
+          // --- SUNRISE WINDOW [sunrise - 0.5, sunrise + 0.5] ---
+          // Distribute the warm sunrise colors within this 1-hour window
+          addColor(sunriseStart, '#ff8c5a9e'); // Fade in start
+          addColor(sunriseStart + 0.1, '#FF8C5A');
+          addColor(sunriseStart + 0.2, '#FF9864');
+          addColor(sunriseStart + 0.3, '#FFA46E');
+          addColor(sunriseStart + 0.4, '#FFB078');
+          addColor(sunrise, '#FFBC82'); // Actual sunrise time
+          addColor(sunrise + 0.1, '#FFC88C');
+          addColor(sunrise + 0.2, '#EDD096');
+          addColor(sunrise + 0.3, '#dcc4a0ff');
+          addColor(sunriseEnd, '#96c1d8ff'); // Transition to blue at end of window
 
-          // Sunrise Phase
-          const sunrisePhase = Math.min(1.5, daylightDuration * 0.15);
-          addColor(sunrise, '#FF8C5A');
-          addColor(sunrise + sunrisePhase * 0.1, '#FF9864');
-          addColor(sunrise + sunrisePhase * 0.2, '#FFA46E');
-          addColor(sunrise + sunrisePhase * 0.3, '#FFB078');
-          addColor(sunrise + sunrisePhase * 0.4, '#FFBC82');
-          addColor(sunrise + sunrisePhase * 0.5, '#FFC88C');
-          addColor(sunrise + sunrisePhase * 0.67, '#EDD096');
-          addColor(sunrise + sunrisePhase, '#DCD8A0');
+          // --- DAY WINDOW [sunrise + 0.5, sunset - 0.5] ---
+          // Natural sky blue palette between the events
 
-          // Morning to Noon
-          const morningStart = sunrise + sunrisePhase;
-          const morningToNoon = noon - morningStart;
-          addColor(morningStart + morningToNoon * 0.1, '#96D8C8');
-          addColor(morningStart + morningToNoon * 0.3, '#8AD0D2');
-          addColor(morningStart + morningToNoon * 0.5, '#88C8DC');
-          addColor(morningStart + morningToNoon * 0.7, '#87C9E3');
-          addColor(morningStart + morningToNoon * 0.9, '#87CEEB');
+          // We lay out a few points to maintain the gradient structure and "noon" brightness
+          // Start of day proper
+          const dayDuration = sunsetStart - sunriseEnd;
+          const dayStart = sunriseEnd;
 
-          // Noon
-          addColor(noon, '#87CEEB');
+          // Add a few interpolation points for the blue sky
+          addColor(dayStart + dayDuration * 0.2, '#8AD0D2');
+          addColor(dayStart + dayDuration * 0.5, '#87CEEB'); // Peak noonish color (can align with actual noon if within window)
+          // Ensure noon is exactly represented if it falls nicely in the middle (it usually does)
+          // But strict noon alignment isn't as critical as the smooth blue wash requested.
+          // Let's explicitly add the noon color at the actual solar noon if it's inside this window (it technically must be)
+          if (noon > sunriseEnd && noon < sunsetStart) {
+            addColor(noon, '#87CEEB');
+          }
 
-          // Noon to Sunset
-          const noonToSunsetPhase = Math.min(1.5, daylightDuration * 0.15);
-          const sunsetStart = sunset - noonToSunsetPhase;
-          const noonToSunsetDuration = sunsetStart - noon;
-          addColor(noon + noonToSunsetDuration * 0.1, '#88CCE9');
-          addColor(noon + noonToSunsetDuration * 0.3, '#89CAE7');
-          addColor(noon + noonToSunsetDuration * 0.5, '#8BC8E5');
-          addColor(noon + noonToSunsetDuration * 0.7, '#8DC6E3');
-          addColor(noon + noonToSunsetDuration * 0.85, '#90C0DC');
-          addColor(noon + noonToSunsetDuration * 0.95, '#94BAD8');
+          addColor(dayStart + dayDuration * 0.8, '#88CCE9');
+          addColor(sunsetStart, '#98B4D4'); // Transition to evening before sunset window
 
-          // Late afternoon
-          addColor(sunsetStart, '#98B4D4');
-          addColor(sunsetStart + noonToSunsetPhase * 0.33, '#A0ACD2');
-
-          // Sunset Phase
-          addColor(sunset, '#FF9AD0');
-          addColor(sunset + noonToSunsetPhase * 0.1, '#F496CA');
-          addColor(sunset + noonToSunsetPhase * 0.2, '#E992C4');
-          addColor(sunset + noonToSunsetPhase * 0.3, '#DE8EBE');
-          addColor(sunset + noonToSunsetPhase * 0.4, '#d38ab8ff');
+          // --- SUNSET WINDOW [sunset - 0.5, sunset + 0.5] ---
+          // Distribute sunset colors within this 1-hour window
+          const sunsetWindowDuration = 1.0;
+          // We can just step through relative to sunsetStart
+          addColor(sunsetStart + 0.1, '#A0ACD2');
+          addColor(sunsetStart + 0.3, '#FF9AD0');
+          addColor(sunset, '#F496CA'); // Actual sunset time
+          addColor(sunset + 0.1, '#E992C4');
+          addColor(sunset + 0.2, '#DE8EBE');
+          addColor(sunset + 0.3, '#d38ab8ff');
+          // End of light
 
           colors.sort((a, b) => a.hour - b.hour);
           return colors;
