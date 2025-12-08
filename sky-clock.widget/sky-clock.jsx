@@ -15,6 +15,9 @@ try:
     # Copenhagen coordinates
     lat = 55.6761
     lng = 12.5683
+    # Hermanus
+    #lat = -34.4090
+    #lng = 19.2490
 
     # Get current date in YYYY-MM-DD format
     current_date = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -298,80 +301,29 @@ export const render = ({ output }) => {
             return x - Math.floor(x);
           };
 
+          const sunriseAngleDeg = (sunrise - 12) * 15 - 90;
+          const sunsetAngleDeg = (sunset - 12) * 15 - 90;
+
+          const nightStart = sunsetAngleDeg;
+          const nightEnd = sunriseAngleDeg + 360;
+
           // Generate stars
-          for (let i = 0; i < 70; i++) {
-            const angleDeg = random() * 360; // 0 to 360 degrees
-            const r = random() * 245; // Within circle radius
-
-            // Convert angle to hour to check if it's night time
-            // Angle 0 is 6pm (sunset position in our logic below), but let's map standard clock angle
-            // Our angles in drawing: -90 is 12pm, 90 is 12am. 
-            // 180 is 6am, 0 is 6pm.
-
-            // Let's normalize angle to 0-360 starting from -90 (noon)
-            // Or easier: check if the star's angle falls within the night arc.
-
-            // Sunrise/Sunset angles calculated same as hands
-            const sunriseAngleDeg = (sunrise - 12) * 15 - 90;
-            const sunsetAngleDeg = (sunset - 12) * 15 - 90;
-
-            // Normalize angles to 0-360 range for easier comparison if needed, 
-            // but our hands use linear angles.
-            // Night is from Sunset clockwise to Sunrise.
-            // In degrees from -90 (noon):
-            // Sunset is roughly 0 to 90 range.
-            // Sunrise is roughly 180 to 270 range.
-            // Midnight is 90.
-
-            // We need to map the random angle -90 to 270 to match our clock face
-            // Actually we generated 0-360. Let's shift it to align with clock rotation
+          for (let i = 0; i < 100; i++) {
+            const angleDeg = random() * 360;
+            const r = random() * 245;
             const starAngle = angleDeg - 90;
 
-            // Check if star is in the night segment
-            // Night is between sunsetAngle and sunriseAngle (crossing midnight)
-            // Since we go clockwise: Sunset -> Midnight -> Sunrise
-
-            let isNight = false;
-            if (sunriseAngleDeg < sunsetAngleDeg) {
-              // This is weird, typically sunset (e.g. 18:00) is 'larger' hour than sunrise (06:00),
-              // but we are on a 24h clock where 18 > 6.
-              // Wait, on the circle:
-              // -90deg is 12:00
-              // 90deg is 24:00/00:00
-              // Sunset (18:00) is 0deg
-              // Sunrise (06:00) is 180deg
-
-              // So night is from 0deg (Sunset) to 180deg (Sunrise) passing through 90deg.
-              // Range: > SunsetAngle AND < SunriseAngle ? No.
-
-              // Let's use simple logic:
-              // If angle is > sunsetAngle OR angle < sunriseAngle?
-              // Since sunset is approx 0deg and sunrise is approx 180deg.
-              // We want the bottom half.
-
-              // Let's handle generic cases:
-              // Case 1: Sunset < Sunrise (e.g. 0deg to 180deg) -> standard run
-              // Case 2: Sunset > Sunrise (e.g. crossing the wrap-around point if we used 0-360)
-
-              // In our coordinate system (-90 at top):
-              // Sunset is around 0. Sunrise is around 180.
-              // Night is angle > sunset AND angle < sunrise.
-              if (starAngle > sunsetAngleDeg && starAngle < sunriseAngleDeg) {
-                isNight = true;
-              }
-            } else {
-              // This shouldn't happen for standard day/night on this projection unless crazy latitude
-              // But safe fallback logic could be added
-              if (starAngle > sunsetAngleDeg || starAngle < sunriseAngleDeg) {
-                isNight = true;
-              }
+            let visible = false;
+            // Check if star is in the night segment [sunset, sunrise+360]
+            if (starAngle >= nightStart && starAngle <= nightEnd) {
+              visible = true;
             }
 
-            if (isNight) {
+            if (visible) {
               const x = 250 + r * Math.cos(starAngle * Math.PI / 180);
               const y = 250 + r * Math.sin(starAngle * Math.PI / 180);
-              const size = random() * 1.5 + 0.5;
-              const opacity = random() * 0.5 + 0.3;
+              const size = random() * 2 + 0.5;
+              const opacity = random() * 0.7 + 0.1;
               stars.push(<circle cx={x} cy={y} r={size} fill="white" fillOpacity={opacity} key={`star-${i}`} />);
             }
           }
@@ -398,12 +350,12 @@ export const render = ({ output }) => {
               textAnchor="middle"
               dominantBaseline="middle"
               fill="white"
-              fontSize="18"
+              fontSize="24"
               fontWeight="600"
               fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
               style={{
-                textShadow: '0 2px 8px rgba(255, 255, 255, 0.8)',
-                opacity: 0.95
+                textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)',
+                opacity: 1
               }}
             >
               {hour}
@@ -411,47 +363,83 @@ export const render = ({ output }) => {
           );
         })}
 
-        {/* Sunrise tick mark */}
+        {/* Sunrise hand and tick */}
         {(() => {
           const sunriseAngle = ((sunrise - 12) * 15 - 90) * (Math.PI / 180);
-          // Start near edge, end at edge
-          const x1 = 250 + 225 * Math.cos(sunriseAngle);
-          const y1 = 250 + 225 * Math.sin(sunriseAngle);
-          const x2 = 250 + 245 * Math.cos(sunriseAngle);
-          const y2 = 250 + 245 * Math.sin(sunriseAngle);
+
+          // Hand (Black line) from center to tick start
+          const xStart = 250;
+          const yStart = 250;
+          const xEndHand = 250 + 225 * Math.cos(sunriseAngle);
+          const yEndHand = 250 + 225 * Math.sin(sunriseAngle);
+
+          // Tick (White) at edge
+          const xEndTick = 250 + 245 * Math.cos(sunriseAngle);
+          const yEndTick = 250 + 245 * Math.sin(sunriseAngle);
+
           return (
-            <line
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke="#ffffffff"
-              strokeWidth="4"
-              strokeLinecap="round"
-              style={{ opacity: 0.9 }}
-            />
+            <g>
+              {/* Black Hand */}
+              <line
+                x1={xStart}
+                y1={yStart}
+                x2={xEndHand}
+                y2={yEndHand}
+                stroke="black"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+              {/* White Tick */}
+              <line
+                x1={xEndHand}
+                y1={yEndHand}
+                x2={xEndTick}
+                y2={yEndTick}
+                stroke="black"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+            </g>
           );
         })()}
 
-        {/* Sunset tick mark */}
+        {/* Sunset hand and tick */}
         {(() => {
           const sunsetAngle = ((sunset - 12) * 15 - 90) * (Math.PI / 180);
-          // Start near edge, end at edge
-          const x1 = 250 + 225 * Math.cos(sunsetAngle);
-          const y1 = 250 + 225 * Math.sin(sunsetAngle);
-          const x2 = 250 + 245 * Math.cos(sunsetAngle);
-          const y2 = 250 + 245 * Math.sin(sunsetAngle);
+
+          // Hand (Black line) from center to tick start
+          const xStart = 250;
+          const yStart = 250;
+          const xEndHand = 250 + 225 * Math.cos(sunsetAngle);
+          const yEndHand = 250 + 225 * Math.sin(sunsetAngle);
+
+          // Tick (White) at edge
+          const xEndTick = 250 + 245 * Math.cos(sunsetAngle);
+          const yEndTick = 250 + 245 * Math.sin(sunsetAngle);
+
           return (
-            <line
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke="#ffffffff"
-              strokeWidth="4"
-              strokeLinecap="round"
-              style={{ opacity: 0.9 }}
-            />
+            <g>
+              {/* Black Hand */}
+              <line
+                x1={xStart}
+                y1={yStart}
+                x2={xEndHand}
+                y2={yEndHand}
+                stroke="black"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+              {/* White Tick */}
+              <line
+                x1={xEndHand}
+                y1={yEndHand}
+                x2={xEndTick}
+                y2={yEndTick}
+                stroke="black"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+            </g>
           );
         })()}
       </svg>
