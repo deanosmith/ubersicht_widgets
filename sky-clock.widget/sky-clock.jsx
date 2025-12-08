@@ -78,8 +78,8 @@ export const render = ({ output }) => {
   // Parse sunrise/sunset times from command output (matching working example methodology)
   const cleaned = (output || "").trim();
 
-  let sunset = 18;  // Default fallback
-  let sunrise = 6;  // Default fallback
+  let sunset = 12;  // Default fallback
+  let sunrise = 12;  // Default fallback
 
   if (cleaned && cleaned !== "" && cleaned !== "🔴 Error 🔴") {
     const times = cleaned.split(" ");
@@ -94,205 +94,109 @@ export const render = ({ output }) => {
 
   return (
     <div className="clock-container">
-      <svg className="clock-face" viewBox="0 0 500 500">
-        <defs>
-          {/* Blur filter for smooth transitions */}
-          <filter id="blurFilter" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="0" />
-          </filter>
+      {/* Layer 1: Dark Background Circle (for night) */}
+      <div style={{
+        position: 'absolute',
+        top: '1%', left: '1%', width: '98%', height: '98%',
+        borderRadius: '100%',
+        background: '#0a1628',
+        zIndex: 0
+      }} />
 
+      {/* Layer 2: Sky Conic Gradient (with blur) */}
+      {(() => {
+        // Generate hour colors dynamically based on sunrise/sunset
+        // Note: Logic preserved from previous step to ensure smooth gradient
+        const generateHourColors = () => {
+          const colors = [];
+          const addColor = (hour, color) => colors.push({ hour, color });
+
+          const daylightDuration = sunset - sunrise;
+          const noon = (sunrise + sunset) / 2;
+
+          // Pre-dawn
+          addColor(sunrise * .9, '#ff8c5a9e');
+
+          // Sunrise Phase
+          const sunrisePhase = Math.min(1.5, daylightDuration * 0.15);
+          addColor(sunrise, '#FF8C5A');
+          addColor(sunrise + sunrisePhase * 0.1, '#FF9864');
+          addColor(sunrise + sunrisePhase * 0.2, '#FFA46E');
+          addColor(sunrise + sunrisePhase * 0.3, '#FFB078');
+          addColor(sunrise + sunrisePhase * 0.4, '#FFBC82');
+          addColor(sunrise + sunrisePhase * 0.5, '#FFC88C');
+          addColor(sunrise + sunrisePhase * 0.67, '#EDD096');
+          addColor(sunrise + sunrisePhase, '#DCD8A0');
+
+          // Morning to Noon
+          const morningStart = sunrise + sunrisePhase;
+          const morningToNoon = noon - morningStart;
+          addColor(morningStart + morningToNoon * 0.1, '#96D8C8');
+          addColor(morningStart + morningToNoon * 0.3, '#8AD0D2');
+          addColor(morningStart + morningToNoon * 0.5, '#88C8DC');
+          addColor(morningStart + morningToNoon * 0.7, '#87C9E3');
+          addColor(morningStart + morningToNoon * 0.9, '#87CEEB');
+
+          // Noon
+          addColor(noon, '#87CEEB');
+
+          // Noon to Sunset
+          const noonToSunsetPhase = Math.min(1.5, daylightDuration * 0.15);
+          const sunsetStart = sunset - noonToSunsetPhase;
+          const noonToSunsetDuration = sunsetStart - noon;
+          addColor(noon + noonToSunsetDuration * 0.1, '#88CCE9');
+          addColor(noon + noonToSunsetDuration * 0.3, '#89CAE7');
+          addColor(noon + noonToSunsetDuration * 0.5, '#8BC8E5');
+          addColor(noon + noonToSunsetDuration * 0.7, '#8DC6E3');
+          addColor(noon + noonToSunsetDuration * 0.85, '#90C0DC');
+          addColor(noon + noonToSunsetDuration * 0.95, '#94BAD8');
+
+          // Late afternoon
+          addColor(sunsetStart, '#98B4D4');
+          addColor(sunsetStart + noonToSunsetPhase * 0.33, '#A0ACD2');
+
+          // Sunset Phase
+          addColor(sunset, '#FF9AD0');
+          addColor(sunset + noonToSunsetPhase * 0.1, '#F496CA');
+          addColor(sunset + noonToSunsetPhase * 0.2, '#E992C4');
+          addColor(sunset + noonToSunsetPhase * 0.3, '#DE8EBE');
+          addColor(sunset + noonToSunsetPhase * 0.4, '#d38ab8ff');
+
+          colors.sort((a, b) => a.hour - b.hour);
+          return colors;
+        };
+
+        const hourColors = generateHourColors();
+        const stops = hourColors.map(p => `${p.color} ${p.hour * 15}deg`).join(', ');
+        const startAngle = hourColors[0].hour * 15;
+        const endAngle = hourColors[hourColors.length - 1].hour * 15;
+        const gradient = `conic-gradient(from 180deg, transparent 0deg, transparent ${startAngle}deg, ${stops}, transparent ${endAngle}deg, transparent 360deg)`;
+
+        return (
+          <div style={{
+            position: 'absolute',
+            top: '1%', left: '1%', width: '98%', height: '98%',
+            borderRadius: '100%',
+            background: gradient,
+            filter: 'blur(5px)', // Heavy blur for sky atmosphere
+            transform: 'scale(1.0)', // Slight scale to handle blur edges if needed
+            zIndex: 1
+          }} />
+        );
+      })()}
+
+      {/* Layer 3: SVG for stars, labels, hands */}
+      <svg className="clock-face" viewBox="0 0 500 500" style={{ position: 'absolute', zIndex: 10 }}>
+        {/* Helper defs if needed */}
+        <defs>
           {/* Circular clipping path to contain blur within circle */}
           <clipPath id="circleClip">
             <circle cx="250" cy="250" r="245" />
           </clipPath>
         </defs>
 
-        {/* Main circle background */}
-        <circle cx="250" cy="250" r="245" fill="#0a1628" />
-
-        {/* Group to apply clipping */}
-        <g clipPath="url(#circleClip)">
-          {/* Sky color segments for 24-hour cycle */}
-          {(() => {
-            const segments = [];
-
-            // Generate hour colors dynamically based on sunrise/sunset
-            const generateHourColors = () => {
-              const colors = [];
-
-              // Helper to add color point
-              const addColor = (hour, color) => {
-                colors.push({ hour, color });
-              };
-
-              // Calculate the daylight duration
-              const daylightDuration = sunset - sunrise;
-
-              // Calculate noon as midpoint between sunrise and sunset
-              const noon = (sunrise + sunset) / 2;
-
-              // NO COLORS FOR NIGHT - The dark background will show naturally
-              // We only add colors for the daylight period and brief twilight periods
-
-              // Very subtle pre-dawn (15 minutes before sunrise)
-              addColor(sunrise * .9, '#ff8c5a9e');
-              // addColor(sunrise * .8, '#ff8c5a92');
-              // addColor(sunrise * .7, '#ff8c5a92');
-              // addColor(sunrise * .4, '#ff8c5a92');
-              // addColor(sunrise * .5, '#ff8c5a92');
-
-              // addColor(sunrise + noonToSunsetPhase * 0.1, '#F496CA');
-
-
-              // === SUNRISE PHASE === 
-              // This phase is fixed duration but scales with day length
-              // For very short days, we'll compress this slightly
-              const sunrisePhase = Math.min(1.5, daylightDuration * 0.15); // 15% of daylight or max 1.5 hours
-
-              addColor(sunrise, '#FF8C5A');
-              addColor(sunrise + sunrisePhase * 0.1, '#FF9864');
-              addColor(sunrise + sunrisePhase * 0.2, '#FFA46E');
-              addColor(sunrise + sunrisePhase * 0.3, '#FFB078');
-              addColor(sunrise + sunrisePhase * 0.4, '#FFBC82');
-              addColor(sunrise + sunrisePhase * 0.5, '#FFC88C');
-              addColor(sunrise + sunrisePhase * 0.67, '#EDD096');
-              addColor(sunrise + sunrisePhase, '#DCD8A0');
-
-              // === MORNING TO NOON TRANSITION ===
-              // Transition from golden hour to blue sky
-              const morningStart = sunrise + sunrisePhase;
-              const morningToNoon = noon - morningStart;
-
-              addColor(morningStart + morningToNoon * 0.1, '#96D8C8');
-              addColor(morningStart + morningToNoon * 0.3, '#8AD0D2');
-              addColor(morningStart + morningToNoon * 0.5, '#88C8DC');
-              addColor(morningStart + morningToNoon * 0.7, '#87C9E3');
-              addColor(morningStart + morningToNoon * 0.9, '#87CEEB');
-
-              // === NOON - PEAK BLUE SKY ===
-              addColor(noon, '#87CEEB');
-
-              // === NOON TO SUNSET TRANSITION ===
-              // Blue sky transitioning to warmer sunset colors
-              const noonToSunsetPhase = Math.min(1.5, daylightDuration * 0.15); // 15% of daylight or max 1.5 hours
-              const sunsetStart = sunset - noonToSunsetPhase;
-              const noonToSunsetDuration = sunsetStart - noon;
-
-              addColor(noon + noonToSunsetDuration * 0.1, '#88CCE9');
-              addColor(noon + noonToSunsetDuration * 0.3, '#89CAE7');
-              addColor(noon + noonToSunsetDuration * 0.5, '#8BC8E5');
-              addColor(noon + noonToSunsetDuration * 0.7, '#8DC6E3');
-              addColor(noon + noonToSunsetDuration * 0.85, '#90C0DC');
-              addColor(noon + noonToSunsetDuration * 0.95, '#94BAD8');
-
-              // Late afternoon warming
-              addColor(sunsetStart, '#98B4D4');
-              addColor(sunsetStart + noonToSunsetPhase * 0.33, '#A0ACD2');
-
-              // === SUNSET PHASE ===
-              addColor(sunset, '#FF9AD0');
-              addColor(sunset + noonToSunsetPhase * 0.1, '#F496CA');
-              addColor(sunset + noonToSunsetPhase * 0.2, '#E992C4');
-              addColor(sunset + noonToSunsetPhase * 0.3, '#DE8EBE');
-              addColor(sunset + noonToSunsetPhase * 0.4, '#d38ab8ff');
-              // addColor(sunset + noonToSunsetPhase * 0.5, '#C086B2');
-              // addColor(sunset + noonToSunsetPhase * 0.67, '#9A6E96');
-
-              // === DUSK TRANSITION TO NIGHT ===
-              // Quick transition to darkness
-              // addColor(sunset + noonToSunsetPhase, '#4e466e');
-              // addColor(sunset + noonToSunsetPhase + 0.5, '#3b3c64');
-              // addColor(sunset + noonToSunsetPhase + 1, '#1a2646');
-
-              // NO MORE COLORS ADDED - Night will show as dark background
-
-              // Sort by hour
-              colors.sort((a, b) => a.hour - b.hour);
-
-              return colors;
-            };
-
-            const hourColors = generateHourColors();
-
-            // Create smooth segments with gradients
-            for (let i = 0; i < hourColors.length - 1; i++) {
-              const current = hourColors[i];
-              const next = hourColors[i + 1];
-
-              // Convert hour to angle (12 at top = -90°, then clockwise)
-              // Add small overlap to prevent gaps between segments
-              const overlapDegrees = 1; // Small overlap in degrees
-              const currentAngle = ((current.hour - 12) * 15 - 90 - overlapDegrees) * (Math.PI / 180);
-              const nextAngle = ((next.hour - 12) * 15 - 90 + overlapDegrees) * (Math.PI / 180);
-
-              const x1 = 250 + 245 * Math.cos(currentAngle);
-              const y1 = 250 + 245 * Math.sin(currentAngle);
-              const x2 = 250 + 245 * Math.cos(nextAngle);
-              const y2 = 250 + 245 * Math.sin(nextAngle);
-
-              // Create gradient for this segment
-              const gradientId = `grad${i}`;
-
-              segments.push(
-                <defs key={`def-${i}`}>
-                  <linearGradient id={gradientId}>
-                    <stop offset="0%" stopColor={current.color} />
-                    <stop offset="100%" stopColor={next.color} />
-                  </linearGradient>
-                </defs>
-              );
-
-              segments.push(
-                <path
-                  key={i}
-                  d={`M 250 250 L ${x1} ${y1} A 245 245 0 0 1 ${x2} ${y2} Z`}
-                  fill={`url(#${gradientId})`}
-                  filter="url(#blurFilter)"
-                />
-              );
-            }
-
-            return segments;
-          })()}
-        </g>
-
-
-
-        {/* Hour labels - 12, 18, 24, 6 at cardinal positions */}
-        {[
-          { hour: 12, angle: -90 },    // Top (noon)
-          { hour: 18, angle: 0 },      // Right (6pm sunset)
-          { hour: 24, angle: 90 },     // Bottom (midnight)
-          { hour: 6, angle: 180 },     // Left (6am sunrise)
-        ].map(({ hour, angle }) => {
-          const rad = angle * (Math.PI / 180);
-          const x = 250 + 195 * Math.cos(rad);
-          const y = 250 + 195 * Math.sin(rad);
-
-          return (
-            <text
-              key={`label-${hour}`}
-              x={x}
-              y={y}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fill="white"
-              fontSize="18"
-              fontWeight="600"
-              fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-              style={{
-                textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)',
-                opacity: 0.95
-              }}
-            >
-              {hour}
-            </text>
-          );
-        })}
-
-
+        {/* Stars generation */}
         {(() => {
-          // Stars generation
           const stars = [];
           // Deterministic random generator for consistent star positions across renders
           let seed = 1;
@@ -385,7 +289,7 @@ export const render = ({ output }) => {
                 y1={yStart}
                 x2={xEndHand}
                 y2={yEndHand}
-                stroke="black"
+                stroke="grey"
                 strokeWidth="4"
                 strokeLinecap="round"
               />
@@ -395,7 +299,7 @@ export const render = ({ output }) => {
                 y1={yEndHand}
                 x2={xEndTick}
                 y2={yEndTick}
-                stroke="black"
+                stroke="grey"
                 strokeWidth="4"
                 strokeLinecap="round"
               />
@@ -425,7 +329,7 @@ export const render = ({ output }) => {
                 y1={yStart}
                 x2={xEndHand}
                 y2={yEndHand}
-                stroke="black"
+                stroke="grey"
                 strokeWidth="4"
                 strokeLinecap="round"
               />
@@ -435,7 +339,7 @@ export const render = ({ output }) => {
                 y1={yEndHand}
                 x2={xEndTick}
                 y2={yEndTick}
-                stroke="black"
+                stroke="grey"
                 strokeWidth="4"
                 strokeLinecap="round"
               />
@@ -443,6 +347,7 @@ export const render = ({ output }) => {
           );
         })()}
       </svg>
-    </div >
+    </div>
   );
 };
+
