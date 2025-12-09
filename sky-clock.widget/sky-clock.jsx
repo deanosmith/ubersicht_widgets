@@ -60,7 +60,7 @@ export const className = `
   
   .clock-face {
     width: 100%;
-    height: 100%;
+    height: 99%;
     position: relative;
   }
 `;
@@ -97,7 +97,7 @@ export const render = ({ output }) => {
       {/* Layer 1: Dark Background Circle (for night) */}
       <div style={{
         position: 'absolute',
-        top: '-0.3px', left: '1px', width: '99%', height: '99%',
+        top: '-.2px', left: '1px', width: '99%', height: '99%',
         borderRadius: '100%',
         background: '#0a1628',
         zIndex: 0
