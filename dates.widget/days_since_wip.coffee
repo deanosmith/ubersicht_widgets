@@ -1,6 +1,6 @@
 # Übersicht widget to count days until a specific date
 command: """
-  target="2025-08-12" # Default target date
+  target="2026-02-01" # Default target date
   json_file="$HOME/Library/Application Support/Übersicht/widgets/clock.widget/dates.json"
   if [ -f "$json_file" ]; then
     candidate=$(cat "$json_file" | grep '"days_since"' | sed 's/.*"days_since": *"\\([^"]*\\)".*/\\1/')
@@ -54,7 +54,7 @@ render: (output) ->
   daysSince = Number(daysSince)
   """
     <div id="countdown-container" data-target="#{target}">
-      🩼 #{daysSince} Days
+      🐘 #{daysSince} Days
     </div>
   """
 

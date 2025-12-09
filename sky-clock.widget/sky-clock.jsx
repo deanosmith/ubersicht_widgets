@@ -97,7 +97,7 @@ export const render = ({ output }) => {
       {/* Layer 1: Dark Background Circle (for night) */}
       <div style={{
         position: 'absolute',
-        top: '1%', left: '1%', width: '98%', height: '98%',
+        top: '-0.3px', left: '1px', width: '99%', height: '99%',
         borderRadius: '100%',
         background: '#0a1628',
         zIndex: 0
@@ -118,12 +118,12 @@ export const render = ({ output }) => {
 
           const noon = (sunrise + sunset) / 2;
 
-          addColor(sunriseStart - .3, '#ff8c5a2f');
-          addColor(sunriseStart + 0.1, '#ff8c5a72');
-          addColor(sunriseStart + 0.2, '#ff9864cb');
-          addColor(sunriseStart + 0.3, '#FFA46E');
-          addColor(sunriseStart + 0.4, '#FFB078');
-          // addColor(sunrise, '#FFBC82');
+          addColor(sunriseStart - .3, '#ff8c5a0f');
+          // addColor(sunriseStart + 0.1, '#ff8c5a72');
+          addColor(sunriseStart + 0.2, '#ff98649a');
+          // addColor(sunriseStart + 0.3, '#FFA46E');
+          // addColor(sunriseStart + 0.4, '#FFB078');
+          addColor(sunrise, '#FFBC82');
           // addColor(sunrise + 0.1, '#FFC88C');
           // addColor(sunrise + 0.2, '#EDD096');
           // addColor(sunrise + 0.3, '#dcc4a0ff');
@@ -134,20 +134,16 @@ export const render = ({ output }) => {
           const dayStart = sunriseEnd;
 
           // Add a few interpolation points for the blue sky
-          addColor(dayStart + dayDuration * 0.2, '#4cc6ffff');
-          addColor(dayStart + dayDuration * 0.5, '#4cc6ffff');
-          if (noon > sunriseEnd && noon < sunsetStart) {
-            addColor(noon, '#4cc6ffff');
-          }
+          addColor(dayStart + dayDuration * 0.2, '#3cbffcff');
+          addColor(dayStart + dayDuration * .95, '#3cbffcff');
 
-          addColor(dayStart + dayDuration * 0.8, '#4cc6ffff');
-
-          addColor(sunset, '#ff9cc8ff');
-          addColor(sunset + 0.1, '#ff6caeff');
-          addColor(sunset + 0.2, '#ff6cae9f');
-          addColor(sunset + 0.4, '#ff6cae38');
+          addColor(sunset, '#ff6caeff');
+          addColor(sunset + 0.2, '#ff6caeff');
+          addColor(sunset + 0.3, '#ff6cae9f');
+          addColor(sunset + 0.4, '#ff6cae49');
           addColor(sunset + 0.5, '#ff6cae49');
-          addColor(sunset + 0.6, '#ff6cae2e');
+          addColor(sunset + 0.6, '#ff6cae49');
+          addColor(sunset + 0.7, '#ff6cae2e');
 
           colors.sort((a, b) => a.hour - b.hour);
           return colors;
@@ -162,10 +158,10 @@ export const render = ({ output }) => {
         return (
           <div style={{
             position: 'absolute',
-            top: '2%', left: '0%', width: '100%', height: '100%',
+            top: '0%', left: '0%', width: '100%', height: '100%',
             borderRadius: '100%',
             background: gradient,
-            filter: 'blur(5px)', // Heavy blur for sky atmosphere
+            filter: 'blur(0px)', // Heavy blur for sky atmosphere
             // transform: 'scale(1.0)', // Slight scale to handle blur edges if needed
             zIndex: 1
           }} />
@@ -276,7 +272,7 @@ export const render = ({ output }) => {
         })}
 
         {/* Sunrise & Sunset Hands */}
-        {/* {(() => {
+        {(() => {
           const sunriseAngle = ((sunrise - 12) * 15 - 90) * (Math.PI / 180);
 
           // Hand (Black line) from center to tick start
@@ -347,7 +343,7 @@ export const render = ({ output }) => {
               />
             </g>
           );
-        })()} */}
+        })()}
       </svg>
     </div>
   );
