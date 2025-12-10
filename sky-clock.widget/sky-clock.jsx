@@ -134,8 +134,8 @@ export const render = ({ output }) => {
           const dayStart = sunriseEnd;
 
           // Add a few interpolation points for the blue sky
-          addColor(dayStart + dayDuration * 0.2, '#3cbffcff');
-          addColor(dayStart + dayDuration * .95, '#3cbffcff');
+          addColor(dayStart + dayDuration * 0.1, '#1da0dcff');
+          addColor(dayStart + dayDuration * .95, '#1da0dcff');
 
           addColor(sunset, '#ff6caeff');
           addColor(sunset + 0.2, '#ff6caeff');
@@ -176,6 +176,19 @@ export const render = ({ output }) => {
           <clipPath id="circleClip">
             <circle cx="250" cy="250" r="250" />
           </clipPath>
+
+          {/* Drop shadow for hands */}
+          {/* <filter id="handShadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur" />
+            <feOffset in="blur" dx="1" dy="1" result="offsetBlur" />
+            <feComponentTransfer in="offsetBlur" result="shadowMatrix">
+              <feFuncA type="linear" slope="0.5" />
+            </feComponentTransfer>
+            <feMerge>
+              <feMergeNode in="shadowMatrix" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter> */}
         </defs>
 
         {/* Stars generation */}
@@ -275,36 +288,41 @@ export const render = ({ output }) => {
         {(() => {
           const sunriseAngle = ((sunrise - 12) * 15 - 90) * (Math.PI / 180);
 
-          // Hand (Black line) from center to tick start
+          // Hand (Dashed Line)
           const xStart = 250;
           const yStart = 250;
-          const xEndHand = 250 + 200 * Math.cos(sunriseAngle);
-          const yEndHand = 250 + 200 * Math.sin(sunriseAngle);
+          const rLine = 240; // Stop before marker
+          const xEndHand = 250 + rLine * Math.cos(sunriseAngle);
+          const yEndHand = 250 + rLine * Math.sin(sunriseAngle);
 
-          // Tick (White) at edge
-          const xEndTick = 250 + 250 * Math.cos(sunriseAngle);
-          const yEndTick = 250 + 250 * Math.sin(sunriseAngle);
+          // Marker (Hollow Circle at edge)
+          const rMarker = 244;
+          const xMarker = 250 + rMarker * Math.cos(sunriseAngle);
+          const yMarker = 250 + rMarker * Math.sin(sunriseAngle);
 
           return (
             <g>
+              {/* Dashed Line */}
               <line
                 x1={xStart}
                 y1={yStart}
                 x2={xEndHand}
                 y2={yEndHand}
-                stroke="grey"
-                strokeWidth="4"
+                stroke="white"
+                strokeWidth="1.5"
                 strokeLinecap="round"
+                strokeDasharray="4 4"
+                opacity="0.6"
               />
-              {/* <line
-                x1={xEndHand}
-                y1={yEndHand}
-                x2={xEndTick}
-                y2={yEndTick}
-                stroke="grey"
-                strokeWidth="4"
-                strokeLinecap="round"
-              /> */}
+              {/* Sun Marker */}
+              <circle
+                cx={xMarker}
+                cy={yMarker}
+                r="4"
+                fill="white"
+                stroke="white"
+                strokeWidth="1.5"
+              />
             </g>
           );
         })()}
@@ -313,11 +331,13 @@ export const render = ({ output }) => {
 
           const xStart = 250;
           const yStart = 250;
-          const xEndHand = 250 + 200 * Math.cos(sunsetAngle);
-          const yEndHand = 250 + 200 * Math.sin(sunsetAngle);
+          const rLine = 240;
+          const xEndHand = 250 + rLine * Math.cos(sunsetAngle);
+          const yEndHand = 250 + rLine * Math.sin(sunsetAngle);
 
-          const xEndTick = 250 + 250 * Math.cos(sunsetAngle);
-          const yEndTick = 250 + 250 * Math.sin(sunsetAngle);
+          const rMarker = 244;
+          const xMarker = 250 + rMarker * Math.cos(sunsetAngle);
+          const yMarker = 250 + rMarker * Math.sin(sunsetAngle);
 
           return (
             <g>
@@ -326,19 +346,20 @@ export const render = ({ output }) => {
                 y1={yStart}
                 x2={xEndHand}
                 y2={yEndHand}
-                stroke="grey"
-                strokeWidth="4"
+                stroke="white"
+                strokeWidth="1.5"
                 strokeLinecap="round"
+                strokeDasharray="4 4"
+                opacity="0.6"
               />
-              {/* <line
-                x1={xEndHand}
-                y1={yEndHand}
-                x2={xEndTick}
-                y2={yEndTick}
-                stroke="grey"
-                strokeWidth="4" 
-                strokeLinecap="round"
-              /> */}
+              <circle
+                cx={xMarker}
+                cy={yMarker}
+                r="4"
+                fill="white"
+                stroke="white"
+                strokeWidth="1.5"
+              />
             </g>
           );
         })()}
@@ -348,24 +369,19 @@ export const render = ({ output }) => {
         {(() => {
           const now = new Date();
           const currentDecimal = now.getHours() + now.getMinutes() / 60;
-          const hourAngle = ((currentDecimal - 12) * 15 - 90) * (Math.PI / 180);
-
-          // Shorter hand for hour (150px vs 225px for sunrise/sunset)
-          const xStart = 250;
-          const yStart = 250;
-          const xEnd = 250 + 200 * Math.cos(hourAngle);
-          const yEnd = 250 + 200 * Math.sin(hourAngle);
+          const rotationText = `rotate(${(currentDecimal - 12) * 15}, 250, 250)`;
 
           return (
-            <line
-              x1={xStart}
-              y1={yStart}
-              x2={xEnd}
-              y2={yEnd}
-              stroke="white"
-              strokeWidth="4"
-              strokeLinecap="round"
-            />
+            <g transform={rotationText}>
+              {/* Main Needle: Sleeker modern design - thin arrow with sharp angled tip and subtle base flare for a "sexy" edge */}
+              <path
+                d="M 248 250 L 248 10 L 252 10 L 252 250 Z"
+                fill="black"
+              />
+              {/* Pivot: Minimal circle with a slight outline for depth */}
+              <circle cx="250" cy="250" r="4" fill="none" stroke="white" strokeWidth="2" />
+              <circle cx="250" cy="250" r="4" fill="black" />
+            </g>
           );
         })()}
       </svg>
