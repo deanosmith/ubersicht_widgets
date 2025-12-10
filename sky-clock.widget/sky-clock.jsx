@@ -2,7 +2,7 @@
 // A visual 24-hour clock with sky colors representing time of day
 
 // Refresh once every day
-export const refreshFrequency = 1000 * 60 * 60 * 24;
+export const refreshFrequency = 1000 * 60 * 15; // Update every 15 minutes
 
 // Fetch sunrise and sunset times for Copenhagen (matches working example methodology)
 export const command = `
@@ -278,8 +278,8 @@ export const render = ({ output }) => {
           // Hand (Black line) from center to tick start
           const xStart = 250;
           const yStart = 250;
-          const xEndHand = 250 + 225 * Math.cos(sunriseAngle);
-          const yEndHand = 250 + 225 * Math.sin(sunriseAngle);
+          const xEndHand = 249 + 249 * Math.cos(sunriseAngle);
+          const yEndHand = 249 + 249 * Math.sin(sunriseAngle);
 
           // Tick (White) at edge
           const xEndTick = 250 + 245 * Math.cos(sunriseAngle);
@@ -292,11 +292,11 @@ export const render = ({ output }) => {
                 y1={yStart}
                 x2={xEndHand}
                 y2={yEndHand}
-                stroke="grey"
+                stroke="black"
                 strokeWidth="4"
                 strokeLinecap="round"
               />
-              <line
+              {/* <line
                 x1={xEndHand}
                 y1={yEndHand}
                 x2={xEndTick}
@@ -304,22 +304,20 @@ export const render = ({ output }) => {
                 stroke="grey"
                 strokeWidth="4"
                 strokeLinecap="round"
-              />
+              /> */}
             </g>
           );
         })()}
         {(() => {
           const sunsetAngle = ((sunset - 12) * 15 - 90) * (Math.PI / 180);
 
-          // Hand (Black line) from center to tick start
           const xStart = 250;
           const yStart = 250;
-          const xEndHand = 250 + 225 * Math.cos(sunsetAngle);
-          const yEndHand = 250 + 225 * Math.sin(sunsetAngle);
+          const xEndHand = 250 + 250 * Math.cos(sunsetAngle);
+          const yEndHand = 250 + 250 * Math.sin(sunsetAngle);
 
-          // Tick (White) at edge
-          const xEndTick = 250 + 245 * Math.cos(sunsetAngle);
-          const yEndTick = 250 + 245 * Math.sin(sunsetAngle);
+          const xEndTick = 250 + 250 * Math.cos(sunsetAngle);
+          const yEndTick = 250 + 250 * Math.sin(sunsetAngle);
 
           return (
             <g>
@@ -328,20 +326,46 @@ export const render = ({ output }) => {
                 y1={yStart}
                 x2={xEndHand}
                 y2={yEndHand}
-                stroke="grey"
+                stroke="black"
                 strokeWidth="4"
                 strokeLinecap="round"
               />
-              <line
+              {/* <line
                 x1={xEndHand}
                 y1={yEndHand}
                 x2={xEndTick}
                 y2={yEndTick}
                 stroke="grey"
-                strokeWidth="4"
+                strokeWidth="4" 
                 strokeLinecap="round"
-              />
+              /> */}
             </g>
+          );
+        })()}
+
+
+        {/* Hour Hand */}
+        {(() => {
+          const now = new Date();
+          const currentDecimal = now.getHours() + now.getMinutes() / 60;
+          const hourAngle = ((currentDecimal - 12) * 15 - 90) * (Math.PI / 180);
+
+          // Shorter hand for hour (150px vs 225px for sunrise/sunset)
+          const xStart = 250;
+          const yStart = 250;
+          const xEnd = 250 + 200 * Math.cos(hourAngle);
+          const yEnd = 250 + 200 * Math.sin(hourAngle);
+
+          return (
+            <line
+              x1={xStart}
+              y1={yStart}
+              x2={xEnd}
+              y2={yEnd}
+              stroke="white"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
           );
         })()}
       </svg>
