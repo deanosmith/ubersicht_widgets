@@ -56,6 +56,9 @@ export const className = `
     width: 250px;
     height: 250px;
     position: relative;
+    border-radius: 50%;
+    overflow: hidden;
+    /* isolation: isolate; */ /* Ensure distinct stacking context if needed */
   }
   
   .clock-face {
@@ -137,12 +140,12 @@ export const render = ({ output }) => {
           addColor(dayStart + dayDuration * 0.1, '#1da0dcff');
           addColor(dayStart + dayDuration * .95, '#1da0dcff');
 
-          addColor(sunset, '#ff6caeff');
-          addColor(sunset + 0.2, '#ff6caeff');
-          addColor(sunset + 0.3, '#ff6cae9f');
-          addColor(sunset + 0.4, '#ff6cae49');
-          addColor(sunset + 0.5, '#ff6cae49');
-          addColor(sunset + 0.6, '#ff6cae49');
+          addColor(sunset, '#d0619fff');
+          addColor(sunset + 0.2, '#c13b61c6');
+          addColor(sunset + 0.3, '#ff6c6c9f');
+          addColor(sunset + 0.4, '#ff6cae6d');
+          addColor(sunset + 0.5, '#ff6cae59');
+          addColor(sunset + 0.6, '#ff6cae51');
           addColor(sunset + 0.7, '#ff6cae2e');
 
           colors.sort((a, b) => a.hour - b.hour);
@@ -161,8 +164,8 @@ export const render = ({ output }) => {
             top: '0%', left: '0%', width: '100%', height: '100%',
             borderRadius: '100%',
             background: gradient,
-            filter: 'blur(0px)', // Heavy blur for sky atmosphere
-            // transform: 'scale(1.0)', // Slight scale to handle blur edges if needed
+            filter: 'blur(6px)', // Heavy blur for sky atmosphere
+            transform: 'scale(1.05)', // Slight scale to handle blur edges and avoid transparency at rim
             zIndex: 1
           }} />
         );
@@ -303,7 +306,7 @@ export const render = ({ output }) => {
           return (
             <g>
               {/* Dashed Line */}
-              <line
+              {/* <line
                 x1={xStart}
                 y1={yStart}
                 x2={xEndHand}
@@ -313,7 +316,7 @@ export const render = ({ output }) => {
                 strokeLinecap="round"
                 strokeDasharray="4 4"
                 opacity="0.6"
-              />
+              /> */}
               {/* Sun Marker */}
               <circle
                 cx={xMarker}
@@ -321,7 +324,7 @@ export const render = ({ output }) => {
                 r="4"
                 fill="white"
                 stroke="white"
-                strokeWidth="1.5"
+                strokeWidth="5"
               />
             </g>
           );
@@ -341,7 +344,7 @@ export const render = ({ output }) => {
 
           return (
             <g>
-              <line
+              {/* <line
                 x1={xStart}
                 y1={yStart}
                 x2={xEndHand}
@@ -351,14 +354,14 @@ export const render = ({ output }) => {
                 strokeLinecap="round"
                 strokeDasharray="4 4"
                 opacity="0.6"
-              />
+              /> */}
               <circle
                 cx={xMarker}
                 cy={yMarker}
-                r="4"
+                r="5"
                 fill="white"
                 stroke="white"
-                strokeWidth="1.5"
+                strokeWidth="4"
               />
             </g>
           );
@@ -376,7 +379,7 @@ export const render = ({ output }) => {
               {/* Main Needle: Sleeker modern design - thin arrow with sharp angled tip and subtle base flare for a "sexy" edge */}
               <path
                 d="M 248 250 L 248 10 L 252 10 L 252 250 Z"
-                fill="black"
+                fill="white"
               />
               {/* Pivot: Minimal circle with a slight outline for depth */}
               <circle cx="250" cy="250" r="4" fill="none" stroke="white" strokeWidth="2" />
