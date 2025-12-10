@@ -60,7 +60,7 @@ export const className = `
   
   .clock-face {
     width: 100%;
-    height: 99%;
+    height: 100%;
     position: relative;
   }
 `;
@@ -97,7 +97,7 @@ export const render = ({ output }) => {
       {/* Layer 1: Dark Background Circle (for night) */}
       <div style={{
         position: 'absolute',
-        top: '-.2px', left: '1px', width: '99%', height: '99%',
+        top: '0%', left: '0%', width: '100%', height: '100%',
         borderRadius: '100%',
         background: '#0a1628',
         zIndex: 0
@@ -174,7 +174,7 @@ export const render = ({ output }) => {
         <defs>
           {/* Circular clipping path to contain blur within circle */}
           <clipPath id="circleClip">
-            <circle cx="250" cy="250" r="245" />
+            <circle cx="250" cy="250" r="250" />
           </clipPath>
         </defs>
 
@@ -197,7 +197,7 @@ export const render = ({ output }) => {
           // Generate stars
           for (let i = 0; i < 100; i++) {
             const angleDeg = random() * 360;
-            const r = random() * 245;
+            const r = random() * 250;
             const starAngle = angleDeg - 90;
 
             let visible = false;
@@ -225,9 +225,9 @@ export const render = ({ output }) => {
           const rad = angleDeg * (Math.PI / 180);
 
           // Tick geometry
-          // Outer radius is ~245 (clip is 245)
-          const tickInnerR = 235;
-          const tickOuterR = 245;
+          // Outer radius is 249 (to accommodate 1 unit cap for strict 250 edge)
+          const tickInnerR = 240;
+          const tickOuterR = 249;
 
           const x1 = 250 + tickInnerR * Math.cos(rad);
           const y1 = 250 + tickInnerR * Math.sin(rad);
@@ -235,7 +235,7 @@ export const render = ({ output }) => {
           const y2 = 250 + tickOuterR * Math.sin(rad);
 
           // Label geometry
-          const labelR = 220;
+          const labelR = 225;
           const lx = 250 + labelR * Math.cos(rad);
           const ly = 250 + labelR * Math.sin(rad);
 
@@ -278,12 +278,12 @@ export const render = ({ output }) => {
           // Hand (Black line) from center to tick start
           const xStart = 250;
           const yStart = 250;
-          const xEndHand = 249 + 249 * Math.cos(sunriseAngle);
-          const yEndHand = 249 + 249 * Math.sin(sunriseAngle);
+          const xEndHand = 250 + 200 * Math.cos(sunriseAngle);
+          const yEndHand = 250 + 200 * Math.sin(sunriseAngle);
 
           // Tick (White) at edge
-          const xEndTick = 250 + 245 * Math.cos(sunriseAngle);
-          const yEndTick = 250 + 245 * Math.sin(sunriseAngle);
+          const xEndTick = 250 + 250 * Math.cos(sunriseAngle);
+          const yEndTick = 250 + 250 * Math.sin(sunriseAngle);
 
           return (
             <g>
@@ -292,7 +292,7 @@ export const render = ({ output }) => {
                 y1={yStart}
                 x2={xEndHand}
                 y2={yEndHand}
-                stroke="black"
+                stroke="grey"
                 strokeWidth="4"
                 strokeLinecap="round"
               />
@@ -313,8 +313,8 @@ export const render = ({ output }) => {
 
           const xStart = 250;
           const yStart = 250;
-          const xEndHand = 250 + 250 * Math.cos(sunsetAngle);
-          const yEndHand = 250 + 250 * Math.sin(sunsetAngle);
+          const xEndHand = 250 + 200 * Math.cos(sunsetAngle);
+          const yEndHand = 250 + 200 * Math.sin(sunsetAngle);
 
           const xEndTick = 250 + 250 * Math.cos(sunsetAngle);
           const yEndTick = 250 + 250 * Math.sin(sunsetAngle);
@@ -326,7 +326,7 @@ export const render = ({ output }) => {
                 y1={yStart}
                 x2={xEndHand}
                 y2={yEndHand}
-                stroke="black"
+                stroke="grey"
                 strokeWidth="4"
                 strokeLinecap="round"
               />
