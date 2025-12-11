@@ -15,9 +15,15 @@ try:
     # Copenhagen coordinates
     lat = 55.6761
     lng = 12.5683
+    
     # Hermanus
     #lat = -34.4090
     #lng = 19.2490
+    
+    # Durban
+    #lat = -29.8587
+    #lng = 31.0218
+
 
     # Get current date in YYYY-MM-DD format
     current_date = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -39,8 +45,30 @@ try:
     sunrise_local = sunrise_utc.astimezone(ZoneInfo("Europe/Copenhagen"))
     sunset_local = sunset_utc.astimezone(ZoneInfo("Europe/Copenhagen"))
 
-    # Print times in 24-hour format (HH:MM HH:MM)
-    print(sunrise_local.strftime("%H:%M"), sunset_local.strftime("%H:%M"))
+    # Fetch simple current weather (no API key) from Open-Meteo
+    weather_resp = requests.get(
+        f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true",
+        timeout=10,
+    )
+    weather_resp.raise_for_status()
+    weather_data = weather_resp.json().get("current_weather", {})
+    weather_code = weather_data.get("weathercode")
+
+    def map_weather(code):
+        if code is None:
+            return "sunny"
+        if code in (0, 1, 2):
+            return "sunny"
+        if code in (3, 45, 48, 71, 73, 75, 77):
+            return "overcast"
+        if code in (51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99):
+            return "rainy"
+        return "sunny"
+
+    condition = map_weather(weather_code)
+
+    # Print times in 24-hour format (HH:MM HH:MM condition)
+    print(sunrise_local.strftime("%H:%M"), sunset_local.strftime("%H:%M"), condition)
 except Exception:
     print("🔴 Error 🔴")
 '
@@ -66,12 +94,37 @@ export const className = `
     height: 100%;
     position: relative;
   }
+
+  .rain-line {
+    animation-name: rainFall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    transform-origin: center;
+  }
+
+  @keyframes rainFall {
+    0% { transform: translateY(-8px); opacity: 0; }
+    10% { opacity: 1; }
+    100% { transform: translateY(24px); opacity: 0; }
+  }
 `;
 
 // Helper function to convert "HH:MM" to decimal hours
 const timeToDecimal = (timeStr) => {
   const [hours, minutes] = timeStr.split(':').map(Number);
   return hours + minutes / 60.0;
+};
+
+// Map simple weather state to day sky styling
+const getDaySkyStyle = (condition) => {
+  const normalized = (condition || '').toLowerCase();
+  if (normalized === 'overcast') {
+    return { dayColor: '#8a929cff', isRainy: false };
+  }
+  if (normalized === 'rainy') {
+    return { dayColor: '#7a818bff', isRainy: true };
+  }
+  return { dayColor: '#1da0dcff', isRainy: false }; // Sunny / default
 };
 
 // Render the clock
@@ -81,19 +134,30 @@ export const render = ({ output }) => {
   // Parse sunrise/sunset times from command output (matching working example methodology)
   const cleaned = (output || "").trim();
 
-  let sunset = 12;  // Default fallback
-  let sunrise = 12;  // Default fallback
+  let sunset = 10;  // Default fallback
+  let sunrise = 14;  // Default fallback
+  let weatherCondition = 'sunny';
 
   if (cleaned && cleaned !== "" && cleaned !== "🔴 Error 🔴") {
-    const times = cleaned.split(" ");
-    if (times.length >= 2) {
-      sunrise = timeToDecimal(times[0]);  // Parse sunrise from API
-      sunset = timeToDecimal(times[1]);   // Parse sunset from API
+    const parts = cleaned.split(/\s+/);
+    if (parts.length >= 1 && parts[0]) {
+      sunrise = timeToDecimal(parts[0]);  // Parse sunrise from API
+    }
+    if (parts.length >= 2 && parts[1]) {
+      sunset = timeToDecimal(parts[1]);   // Parse sunset from API
+    }
+    if (parts.length >= 3 && parts[2]) {
+      weatherCondition = parts[2].toLowerCase();
     }
   }
 
+  // Force rain for testing visuals (comment out to revert to live data)
+  weatherCondition = 'rainy';
+
+  const { dayColor, isRainy } = getDaySkyStyle(weatherCondition);
+
   // Debug output to console
-  console.log("Sky Clock - Sunrise:", sunrise, "Sunset:", sunset, "Raw output:", output);
+  console.log("Sky Clock - Sunrise:", sunrise, "Sunset:", sunset, "Weather:", weatherCondition, "Raw output:", output);
 
   return (
     <div className="clock-container">
@@ -136,9 +200,9 @@ export const render = ({ output }) => {
           const dayDuration = sunsetStart - sunriseEnd;
           const dayStart = sunriseEnd;
 
-          // Add a few interpolation points for the blue sky
-          addColor(dayStart + dayDuration * 0.1, '#1da0dcff');
-          addColor(dayStart + dayDuration * .95, '#1da0dcff');
+          // Add a few interpolation points for the daytime sky (weather driven)
+          addColor(dayStart + dayDuration * 0.1, dayColor);
+          addColor(dayStart + dayDuration * .95, dayColor);
 
           addColor(sunset, '#d0619fff');
           addColor(sunset + 0.2, '#c13b61c6');
@@ -168,6 +232,57 @@ export const render = ({ output }) => {
             transform: 'scale(1.05)', // Slight scale to handle blur edges and avoid transparency at rim
             zIndex: 1
           }} />
+        );
+      })()}
+
+      {/* Rain overlay for rainy weather (daylight segment only) */}
+      {isRainy && (() => {
+        const drops = [];
+        let seed = 600;
+        const random = () => {
+          const x = Math.sin(seed++) * 10000;
+          return x - Math.floor(x);
+        };
+
+        const startDeg = (sunrise - 12) * 15 - 90;
+        const endDeg = (sunset - 12) * 15 - 90;
+        const span = Math.max(1, endDeg - startDeg);
+
+        for (let i = 0; i < 140; i++) {
+          const angleDeg = startDeg + random() * span;
+          const angleRad = angleDeg * Math.PI / 180;
+          // Uniform-ish distribution across the daylight wedge (center to edge)
+          const r = Math.sqrt(random()) * 240;
+          const x1 = 250 + r * Math.cos(angleRad);
+          const y1 = 250 + r * Math.sin(angleRad);
+          const length = 6 + random() * 6;
+          const wind = (random() - 0.5) * 1.5; // slight slant
+          const x2 = x1 + wind;
+          const y2 = y1 + length;
+          const opacity = 0.22 + random() * 0.22;
+          const duration = 1.1 + random() * 0.9;
+          const delay = random() * duration;
+          drops.push(
+            <line
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
+              stroke="#cbd3dc"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeOpacity={opacity}
+              className="rain-line"
+              style={{ animationDuration: `${duration}s`, animationDelay: `${delay}s` }}
+              key={`rain-${i}`}
+            />
+          );
+        }
+
+        return (
+          <svg viewBox="0 0 500 500" style={{ position: 'absolute', top: '0%', left: '0%', width: '100%', height: '100%', borderRadius: '100%', zIndex: 5, pointerEvents: 'none' }}>
+            {drops}
+          </svg>
         );
       })()}
 
@@ -391,4 +506,3 @@ export const render = ({ output }) => {
     </div>
   );
 };
-
