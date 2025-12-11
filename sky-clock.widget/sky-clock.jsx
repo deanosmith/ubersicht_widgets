@@ -152,7 +152,7 @@ export const render = ({ output }) => {
   }
 
   // Force rain for testing visuals (comment out to revert to live data)
-  weatherCondition = 'rainy';
+  // weatherCondition = 'rainy';
 
   const { dayColor, isRainy } = getDaySkyStyle(weatherCondition);
 
