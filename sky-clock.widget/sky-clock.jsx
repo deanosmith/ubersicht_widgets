@@ -102,6 +102,31 @@ export const className = `
     transform-origin: center;
   }
 
+  .moon-meta {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    text-align: center;
+    color: white;
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    letter-spacing: 0.4px;
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  .moon-meta__stage {
+    font-size: 18px;
+    font-weight: 600;
+    display: block;
+  }
+
+  .moon-meta__position {
+    font-size: 13px;
+    opacity: 0.85;
+  }
+
   @keyframes rainFall {
     0% { transform: translateY(-8px); opacity: 0; }
     10% { opacity: 1; }
@@ -127,8 +152,61 @@ const getDaySkyStyle = (condition) => {
   return { dayColor: '#1da0dcff', isRainy: false }; // Sunny / default
 };
 
+const SYNODIC_MONTH_DAYS = 29.53058867;
+
+const calculateMoonPhase = (date) => {
+  const knownNewMoon = Date.UTC(2000, 0, 6, 18, 14);
+  const nowUTC = Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+    date.getUTCHours(),
+    date.getUTCMinutes(),
+    date.getUTCSeconds()
+  );
+  const daysSinceKnownNewMoon = (nowUTC - knownNewMoon) / 86400000;
+  const phase = (daysSinceKnownNewMoon / SYNODIC_MONTH_DAYS) % 1;
+  return phase < 0 ? phase + 1 : phase;
+};
+
+const getMoonPhaseKey = (phase) => {
+  if (phase <= 0.0625 || phase > 0.9375) return 'phase_new';
+  if (phase <= 0.1875) return 'phase_waxing_crescent';
+  if (phase <= 0.3125) return 'phase_first_quarter';
+  if (phase <= 0.4375) return 'phase_waxing_gibbous';
+  if (phase <= 0.5625) return 'phase_full';
+  if (phase <= 0.6875) return 'phase_waning_gibbous';
+  if (phase <= 0.8125) return 'phase_third_quarter';
+  return 'phase_waning_crescent';
+};
+
+const MOON_PHASE_LABELS = {
+  phase_new: 'New Moon',
+  phase_waxing_crescent: 'Waxing Crescent',
+  phase_first_quarter: 'First Quarter',
+  phase_waxing_gibbous: 'Waxing Gibbous',
+  phase_full: 'Full Moon',
+  phase_waning_gibbous: 'Waning Gibbous',
+  phase_third_quarter: 'Third Quarter',
+  phase_waning_crescent: 'Waning Crescent',
+};
+
 // Render the clock
 export const render = ({ output }) => {
+  const now = new Date();
+  const moonPhase = calculateMoonPhase(now);
+  const moonPhaseKey = getMoonPhaseKey(moonPhase);
+  const moonStageLabel = MOON_PHASE_LABELS[moonPhaseKey];
+  const moonIconPath = `moon-phase.widget/${moonPhaseKey}.png`; // Reuse dedicated moon-phase art assets
+  const moonPhasePercent = Math.round(moonPhase * 100);
+  const moonAgeDays = moonPhase * SYNODIC_MONTH_DAYS;
+  const moonAngleDeg = moonPhase * 360 - 90;
+  const moonAngleRad = moonAngleDeg * (Math.PI / 180);
+  const moonMarkerRadius = 185;
+  const moonMarkerX = 250 + moonMarkerRadius * Math.cos(moonAngleRad);
+  const moonMarkerY = 250 + moonMarkerRadius * Math.sin(moonAngleRad);
+  const moonPositionString = `Position: day ${moonAgeDays.toFixed(1)} / 29.5 | ${moonPhasePercent}% cycle`;
+
   // Default sunrise/sunset times (in decimal hours)
 
   // Parse sunrise/sunset times from command output (matching working example methodology)
@@ -157,7 +235,19 @@ export const render = ({ output }) => {
   const { dayColor, isRainy } = getDaySkyStyle(weatherCondition);
 
   // Debug output to console
-  console.log("Sky Clock - Sunrise:", sunrise, "Sunset:", sunset, "Weather:", weatherCondition, "Raw output:", output);
+  console.log(
+    'Sky Clock - Sunrise:',
+    sunrise,
+    'Sunset:',
+    sunset,
+    'Weather:',
+    weatherCondition,
+    'Moon:',
+    moonStageLabel,
+    `${moonPhasePercent}%`,
+    'Raw output:',
+    output
+  );
 
   return (
     <div className="clock-container">
@@ -483,9 +573,38 @@ export const render = ({ output }) => {
         })()}
 
 
+        {/* Moon marker */}
+        <g>
+          {/* <line
+            x1="250"
+            y1="250"
+            x2={moonMarkerX}
+            y2={moonMarkerY}
+            stroke="rgba(255, 255, 255, 0.35)"
+            strokeWidth="4"
+            // strokeDasharray="4 4"
+          /> */}
+          <g transform={`translate(${moonMarkerX}, ${moonMarkerY})`}>
+            <circle
+              r="17"
+              fill="rgba(10, 22, 40, 0.55)"
+              stroke="white"
+              strokeWidth="3"
+            />
+            <image
+              href={moonIconPath}
+              x="-18"
+              y="-18"
+              width="36"
+              height="36"
+              style={{ pointerEvents: 'none' }}
+              preserveAspectRatio="xMidYMid slice"
+            />
+          </g>
+        </g>
+
         {/* Hour Hand */}
         {(() => {
-          const now = new Date();
           const currentDecimal = now.getHours() + now.getMinutes() / 60;
           const rotationText = `rotate(${(currentDecimal - 12) * 15}, 250, 250)`;
 
@@ -503,6 +622,10 @@ export const render = ({ output }) => {
           );
         })()}
       </svg>
+      {/* <div className="moon-meta"> */}
+        {/* <span className="moon-meta__stage">{moonStageLabel}</span> */}
+        {/* <span className="moon-meta__position">{moonPositionString}</span> */}
+      {/* </div> */}
     </div>
   );
 };
