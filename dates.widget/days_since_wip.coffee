@@ -54,7 +54,7 @@ render: (output) ->
   daysSince = Number(daysSince)
   """
     <div id="countdown-container" data-target="#{target}">
-      🐘 #{daysSince} Days
+      !!!🐘 #{daysSince} Days
     </div>
   """
 

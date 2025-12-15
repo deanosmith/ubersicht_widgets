@@ -228,7 +228,7 @@ export const render = ({ output }) => {
             top: '0%', left: '0%', width: '100%', height: '100%',
             borderRadius: '100%',
             background: gradient,
-            filter: 'blur(6px)', // Heavy blur for sky atmosphere
+            filter: 'blur(4px)', // Heavy blur for sky atmosphere
             transform: 'scale(1.05)', // Slight scale to handle blur edges and avoid transparency at rim
             zIndex: 1
           }} />
