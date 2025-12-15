@@ -26,7 +26,7 @@ render: (output) ->
   days = if days.length == 1 then "0#{days}" else days
   """
     <div id="countdown-container">
-      🏝️ #{weeks} - #{days}
+      🏝️ #{weeks} : #{days}
     </div>
   """
 style: """
