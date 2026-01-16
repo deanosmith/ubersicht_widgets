@@ -1,18 +1,39 @@
-# Übersicht widget to count weeks until a specific date
 command: """
-  targetDate=$(date -j -f "%Y-%m-%d" "2026-05-02" "+%s")
-  currentDate=$(date "+%s")
-  weeksLeft=$(echo "($targetDate - $currentDate) / (86400 * 7)" | bc)
-  echo $weeksLeft
+  python3 - <<'PY'
+from datetime import date
+import calendar
+
+target = date(2026, 5, 2)
+today = date.today()
+
+if today >= target:
+    total_weeks = 0
+    total_days = 0
+else:
+    # Calculate total days remaining
+    delta = target - today
+    total_days = delta.days
+    total_weeks = total_days // 7
+
+print(f"{total_weeks}.{total_days}")
+PY
 """
 
-refreshFrequency: 1000 * 60 * 60 * 12 # Refresh twice a day
+refreshFrequency: 1000 * 60 * 60 * 24 # Refresh once every day
+
+render: (output) ->
+  [weeks, days] = output.trim().split('.')
+  days = if days.length == 1 then "0#{days}" else days
+  """
+    <div id="countdown-container">
+      🏁 #{weeks} : #{days}
+  """
 
 style: """
   #countdown-container {
     position: relative;
     margin-left: 25px;
-    margin-top: 430px;
+    margin-top: 340px;
     background-color: black;
     border-radius: 8px;
     border: 2px solid grey;
@@ -24,11 +45,3 @@ style: """
     display: inline-block; /* Make the container size dynamic based on text */
   }
 """
-
-render: (output) ->
-  [weeksLeft] = output.split(',').map(Number)
-  """
-    <div id="countdown-container">
-      🏁 #{weeksLeft} Weeks
-    </div>
-  """

@@ -200,7 +200,15 @@ export const render = ({ output }) => {
   const moonIconPath = `moon-phase.widget/${moonPhaseKey}.png`; // Reuse dedicated moon-phase art assets
   const moonPhasePercent = Math.round(moonPhase * 100);
   const moonAgeDays = moonPhase * SYNODIC_MONTH_DAYS;
-  const moonAngleDeg = moonPhase * 360 - 90;
+  // Calculate Sun Angle (Time of Day): Noon (12) = -90deg (Top)
+  const currentDecimalTime = now.getHours() + now.getMinutes() / 60.0;
+  const sunAngleDeg = (currentDecimalTime - 12) * 15 - 90;
+
+  // Calculate Moon Angle relative to Sun
+  // Moon lags behind Sun by 360 degrees over a full cycle (0..1)
+  const moonPhaseLag = moonPhase * 360;
+  const moonAngleDeg = sunAngleDeg - moonPhaseLag;
+
   const moonAngleRad = moonAngleDeg * (Math.PI / 180);
   const moonMarkerRadius = 185;
   const moonMarkerX = 250 + moonMarkerRadius * Math.cos(moonAngleRad);
@@ -472,7 +480,7 @@ export const render = ({ output }) => {
                 opacity="0.8"
               />
 
-              {/* Label (Even hours only) */}
+              {/* HOURS */}
               {hour % 2 === 0 && (
                 <text
                   x={lx}
@@ -522,14 +530,14 @@ export const render = ({ output }) => {
                 strokeDasharray="4 4"
                 opacity="0.6"
               /> */}
-              {/* Sun Marker */}
+              {/* SUNRISE DOT */}
               <circle
                 cx={xMarker}
                 cy={yMarker}
-                r="4"
+                r="5"
                 fill="white"
                 stroke="white"
-                strokeWidth="5"
+                strokeWidth="3"
               />
             </g>
           );
@@ -549,6 +557,7 @@ export const render = ({ output }) => {
 
           return (
             <g>
+              {/* SUNSET DOT */}
               {/* <line
                 x1={xStart}
                 y1={yStart}
@@ -566,14 +575,14 @@ export const render = ({ output }) => {
                 r="5"
                 fill="white"
                 stroke="white"
-                strokeWidth="4"
+                strokeWidth="3"
               />
             </g>
           );
         })()}
 
 
-        {/* Moon marker */}
+        {/* MOON MARKER */}
         <g>
           {/* <line
             x1="250"
@@ -587,8 +596,8 @@ export const render = ({ output }) => {
           <g transform={`translate(${moonMarkerX}, ${moonMarkerY})`}>
             <circle
               r="17"
-              fill="rgba(10, 22, 40, 0.55)"
-              stroke="white"
+              fill="rgba(255, 255, 255, 0.55)"
+              stroke="rgba(255, 255, 255, 0.42)"
               strokeWidth="3"
             />
             <image
@@ -603,7 +612,7 @@ export const render = ({ output }) => {
           </g>
         </g>
 
-        {/* Hour Hand */}
+        {/* HOUR HAND */}
         {(() => {
           const currentDecimal = now.getHours() + now.getMinutes() / 60;
           const rotationText = `rotate(${(currentDecimal - 12) * 15}, 250, 250)`;
@@ -615,7 +624,6 @@ export const render = ({ output }) => {
                 d="M 248 250 L 248 10 L 252 10 L 252 250 Z"
                 fill="white"
               />
-              {/* Pivot: Minimal circle with a slight outline for depth */}
               <circle cx="250" cy="250" r="4" fill="none" stroke="white" strokeWidth="2" />
               <circle cx="250" cy="250" r="4" fill="black" />
             </g>
@@ -623,8 +631,8 @@ export const render = ({ output }) => {
         })()}
       </svg>
       {/* <div className="moon-meta"> */}
-        {/* <span className="moon-meta__stage">{moonStageLabel}</span> */}
-        {/* <span className="moon-meta__position">{moonPositionString}</span> */}
+      {/* <span className="moon-meta__stage">{moonStageLabel}</span> */}
+      {/* <span className="moon-meta__position">{moonPositionString}</span> */}
       {/* </div> */}
     </div>
   );
