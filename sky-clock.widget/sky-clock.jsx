@@ -20,10 +20,6 @@ try:
     #lat = -34.4090
     #lng = 19.2490
     
-    # Durban
-    #lat = -29.8587
-    #lng = 31.0218
-
 
     # Get current date in YYYY-MM-DD format
     current_date = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -95,13 +91,6 @@ export const className = `
     position: relative;
   }
 
-  .rain-line {
-    animation-name: rainFall;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    transform-origin: center;
-  }
-
   .moon-meta {
     position: absolute;
     bottom: 12px;
@@ -126,18 +115,34 @@ export const className = `
     font-size: 13px;
     opacity: 0.85;
   }
-
-  @keyframes rainFall {
-    0% { transform: translateY(-8px); opacity: 0; }
-    10% { opacity: 1; }
-    100% { transform: translateY(24px); opacity: 0; }
-  }
 `;
 
 // Helper function to convert "HH:MM" to decimal hours
 const timeToDecimal = (timeStr) => {
   const [hours, minutes] = timeStr.split(':').map(Number);
   return hours + minutes / 60.0;
+};
+
+const polarToCartesian = (cx, cy, radius, angleDeg) => {
+  const angleRad = angleDeg * (Math.PI / 180);
+  return {
+    x: cx + radius * Math.cos(angleRad),
+    y: cy + radius * Math.sin(angleRad),
+  };
+};
+
+const describeSectorPath = (cx, cy, radius, startAngleDeg, endAngleDeg) => {
+  const sweep = ((endAngleDeg - startAngleDeg) % 360 + 360) % 360 || 360;
+  const start = polarToCartesian(cx, cy, radius, startAngleDeg);
+  const end = polarToCartesian(cx, cy, radius, endAngleDeg);
+  const largeArcFlag = sweep > 180 ? 1 : 0;
+
+  return [
+    `M ${cx} ${cy}`,
+    `L ${start.x.toFixed(2)} ${start.y.toFixed(2)}`,
+    `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${end.x.toFixed(2)} ${end.y.toFixed(2)}`,
+    'Z',
+  ].join(' ');
 };
 
 // Map simple weather state to day sky styling
@@ -335,51 +340,24 @@ export const render = ({ output }) => {
 
       {/* Rain overlay for rainy weather (daylight segment only) */}
       {isRainy && (() => {
-        const drops = [];
-        let seed = 600;
-        const random = () => {
-          const x = Math.sin(seed++) * 10000;
-          return x - Math.floor(x);
-        };
-
         const startDeg = (sunrise - 12) * 15 - 90;
         const endDeg = (sunset - 12) * 15 - 90;
-        const span = Math.max(1, endDeg - startDeg);
-
-        for (let i = 0; i < 140; i++) {
-          const angleDeg = startDeg + random() * span;
-          const angleRad = angleDeg * Math.PI / 180;
-          // Uniform-ish distribution across the daylight wedge (center to edge)
-          const r = Math.sqrt(random()) * 240;
-          const x1 = 250 + r * Math.cos(angleRad);
-          const y1 = 250 + r * Math.sin(angleRad);
-          const length = 6 + random() * 6;
-          const wind = (random() - 0.5) * 1.5; // slight slant
-          const x2 = x1 + wind;
-          const y2 = y1 + length;
-          const opacity = 0.22 + random() * 0.22;
-          const duration = 1.1 + random() * 0.9;
-          const delay = random() * duration;
-          drops.push(
-            <line
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke="#cbd3dc"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeOpacity={opacity}
-              className="rain-line"
-              style={{ animationDuration: `${duration}s`, animationDelay: `${delay}s` }}
-              key={`rain-${i}`}
-            />
-          );
-        }
+        const rainSectorPath = describeSectorPath(250, 250, 250, startDeg, endDeg);
 
         return (
           <svg viewBox="0 0 500 500" style={{ position: 'absolute', top: '0%', left: '0%', width: '100%', height: '100%', borderRadius: '100%', zIndex: 5, pointerEvents: 'none' }}>
-            {drops}
+            <defs>
+              <pattern id="sky-clock-rain-pattern-primary" width="24" height="24" patternUnits="userSpaceOnUse" patternTransform="rotate(12)">
+                <line x1="5" y1="1" x2="5" y2="14" stroke="#dbe3eb" strokeWidth="3" strokeOpacity="0.18" strokeLinecap="round" />
+                <line x1="17" y1="8" x2="17" y2="21" stroke="#eef3f8" strokeWidth="2.5" strokeOpacity="0.12" strokeLinecap="round" />
+              </pattern>
+              <pattern id="sky-clock-rain-pattern-secondary" width="34" height="30" patternUnits="userSpaceOnUse" patternTransform="rotate(10)">
+                <line x1="8" y1="2" x2="8" y2="18" stroke="#ccd4dd" strokeWidth="3.5" strokeOpacity="0.1" strokeLinecap="round" />
+              </pattern>
+            </defs>
+            <path d={rainSectorPath} fill="rgba(222, 230, 238, 0.05)" />
+            <path d={rainSectorPath} fill="url(#sky-clock-rain-pattern-primary)" />
+            <path d={rainSectorPath} fill="url(#sky-clock-rain-pattern-secondary)" />
           </svg>
         );
       })()}

@@ -3,7 +3,7 @@ command: """
 from datetime import date
 import calendar
 
-target = date(2026, 2, 1)
+target = date(2026, 4, 26)
 today = date.today()
 
 if today >= target:

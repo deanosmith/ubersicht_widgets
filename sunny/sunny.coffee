@@ -9,6 +9,10 @@ try:
     lat = 55.6761
     lng = 12.5683
 
+    # Hermanus
+    #lat = -34.4090
+    #lng = 19.2490
+
     # Get current date in YYYY-MM-DD format
     current_date = datetime.datetime.now().strftime("%Y-%m-%d")
 
