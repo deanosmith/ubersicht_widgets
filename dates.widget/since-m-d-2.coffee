@@ -3,7 +3,7 @@ command: """
 from datetime import date
 import calendar
 
-target = date(2025, 8, 10)
+target = date(2026, 4, 26)
 today = date.today()
 
 if today < target:
@@ -29,14 +29,14 @@ print(f"{months}.{remaining_days}")
 PY
 """
 
-refreshFrequency: 1000 * 60 * 60 * 12 # Refresh once every day
+refreshFrequency: 1000 * 60 * 60 * 24 # Refresh once every 12 hours
 
 render: (output) ->
   [months, days] = output.trim().split('.')
   days = if days.length == 1 then "0#{days}" else days
   """
     <div id="countdown-container">
-      🐘 #{months}.#{days} Months
+      🌱 #{months}.#{days} Months
     </div>
   """
 style: """

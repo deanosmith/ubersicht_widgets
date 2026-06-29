@@ -1,39 +1,33 @@
 command: """
   python3 - <<'PY'
 from datetime import date
-import calendar
 
-target = date(2027, 1, 24)
+target = date(2026, 4, 19)
 today = date.today()
 
-if today >= target:
-    total_weeks = 0
-    total_days = 0
+if today < target:
+    weeks = 0
 else:
-    # Calculate total days remaining
-    delta = target - today
-    total_days = delta.days
-    total_weeks = total_days // 7
+    weeks = (today - target).days // 7
 
-print(f"{total_weeks}.{total_days}")
+print(weeks)
 PY
 """
 
-refreshFrequency: 1000 * 60 * 60 * 24 # Refresh once every day
+refreshFrequency: 1000 * 60 * 60 * 24 # Refresh once every 12 hours
 
 render: (output) ->
-  [weeks, days] = output.trim().split('.')
-  days = if days.length == 1 then "0#{days}" else days
+  weeks = output.trim()
   """
     <div id="countdown-container">
-      🐣 #{weeks} : #{days}
+      🌱 #{weeks} Weeks
     </div>
   """
 style: """
   #countdown-container {
     position: relative;
     margin-left: 25px;
-    margin-top: 385px;
+    margin-top: 297px;
     background-color: black;
     border-radius: 8px;
     border: 2px solid grey;
