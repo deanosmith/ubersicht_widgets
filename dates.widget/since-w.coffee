@@ -7,27 +7,31 @@ today = date.today()
 
 if today < target:
     weeks = 0
+    remaining_days = 0
 else:
-    weeks = (today - target).days // 7
+    total_days = (today - target).days
+    weeks = total_days // 7
+    remaining_days = total_days % 7
 
-print(weeks)
+print(f"{weeks}.{remaining_days}")
 PY
 """
 
 refreshFrequency: 1000 * 60 * 60 * 24 # Refresh once every 12 hours
 
 render: (output) ->
-  weeks = output.trim()
+  [weeks, days] = output.trim().split('.')
+  days = if days.length == 1 then "0#{days}" else days
   """
     <div id="countdown-container">
-      🌱 #{weeks} Weeks
+      🌱 #{weeks}.#{days} Weeks
     </div>
   """
 style: """
   #countdown-container {
     position: relative;
     margin-left: 25px;
-    margin-top: 297px;
+    margin-top: 340px;
     background-color: black;
     border-radius: 8px;
     border: 2px solid grey;
