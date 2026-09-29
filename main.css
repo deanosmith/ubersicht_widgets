@@ -1,0 +1,29 @@
+/* Master layout, loaded by Übersicht for all widgets. Widgets read these via var(). */
+:root {
+    --mast-left: 46px;
+    --mast-top: 0px;
+
+    /* Moon phase */
+    --mast-moon-left: calc(var(--mast-left) - 3px);
+    --mast-moon-top: calc(var(--mast-top) + 10px);
+
+    /* Box rows, top to bottom */
+    --mast-row-1: calc(var(--mast-top) + 120px);
+    /* year progress */
+    --mast-row-2: calc(var(--mast-top) + 153px);
+    /* uptime */
+    --mast-row-3: calc(var(--mast-top) + 195px);
+    /* sunrise / sunset */
+    --mast-row-4: calc(var(--mast-top) + 255px);
+    /* since-m-d */
+    --mast-row-5: calc(var(--mast-top) + 297px);
+    /* since-m-d-2, since-m-d-3 */
+    --mast-row-6: calc(var(--mast-top) + 340px);
+    /* since-w, weeks_left, left */
+    --mast-row-7: calc(var(--mast-top) + 385px);
+    /* left-2, days_since_wip */
+
+    /* Sky clock, anchored to the bottom of the screen */
+    --mast-clock-left: calc(var(--mast-left) + 125px);
+    --mast-clock-bottom: -46px;
+}

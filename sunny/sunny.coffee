@@ -45,8 +45,8 @@ refreshFrequency: 1000 * 60 * 60 * 24 # Refresh once every day
 style: """
   #countdown-container {
     position: relative;
-    margin-left: 25px;
-    margin-top: 195px;
+    margin-left: var(--mast-left);
+    margin-top: var(--mast-row-3);
     background-color: black;
     border-radius: 6px;
     border: 2px solid grey;

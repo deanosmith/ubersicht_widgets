@@ -8,8 +8,8 @@ refreshFrequency: 1000 * 60 * 60 * 24 # Refresh once every 1 days
 style: """
   #progress-container {
     position: relative;
-    margin-left: 25px;
-    margin-top: 120px;
+    margin-left: var(--mast-left);
+    margin-top: var(--mast-row-1);
     width: 200px;
     height: 20px;
     background-color: grey;

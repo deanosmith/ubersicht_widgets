@@ -15,9 +15,8 @@ const glowStrength = 0;
 const glowStyle = () => {
 	let css = "";
 	for (let i = 1; i <= 7; i++) {
-		css += `0 0 ${i * glowStrength}px ${i <= 2 ? textColor : glowColor}${
-			i < 7 ? "," : ""
-		}`;
+		css += `0 0 ${i * glowStrength}px ${i <= 2 ? textColor : glowColor}${i < 7 ? "," : ""
+			}`;
 	}
 	return css;
 };
@@ -27,8 +26,8 @@ const widgetHeight = 100;
 export const className = `
   @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600&display=swap');
 
-  left: 20px;
-  top: 10px;
+  left: var(--mast-moon-left);
+  top: var(--mast-moon-top);
 
   opacity: 1;
 

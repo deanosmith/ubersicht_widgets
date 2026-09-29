@@ -3,7 +3,7 @@ command: """
 from datetime import date
 import calendar
 
-target = date(2027, 1, 24)
+target = date(2027, 1, 21)
 today = date.today()
 
 if today >= target:
@@ -32,8 +32,8 @@ render: (output) ->
 style: """
   #countdown-container {
     position: relative;
-    margin-left: 25px;
-    margin-top: 385px;
+    margin-left: var(--mast-left);
+    margin-top: var(--mast-row-7);
     background-color: black;
     border-radius: 8px;
     border: 2px solid grey;

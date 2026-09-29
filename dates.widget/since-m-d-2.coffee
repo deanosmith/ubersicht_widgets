@@ -42,8 +42,8 @@ render: (output) ->
 style: """
   #countdown-container {
     position: relative;
-    margin-left: 25px;
-    margin-top: 297px;
+    margin-left: var(--mast-left);
+    margin-top: var(--mast-row-5);
     background-color: black;
     border-radius: 8px;
     border: 2px solid grey;

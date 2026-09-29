@@ -72,8 +72,8 @@ except Exception:
 
 // Widget styling
 export const className = `
-  left: 150px;
-  bottom: -100px;
+  left: var(--mast-clock-left);
+  bottom: var(--mast-clock-bottom);
   transform: translate(-50%, -50%);
   
   .clock-container {
