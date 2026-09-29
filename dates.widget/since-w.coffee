@@ -21,25 +21,16 @@ refreshFrequency: 1000 * 60 * 60 * 24 # Refresh once every 12 hours
 
 render: (output) ->
   [weeks, days] = output.trim().split('.')
-  days = if days.length == 1 then "0#{days}" else days
   """
-    <div id="countdown-container">
-      🌱 #{weeks}.#{days} Weeks
+    <div class="mast-chip" style="--accent: #8be36b">
+      <span class="mast-icon">🌱</span>
+      <span class="mast-group">#{weeks}<span class="mast-unit">wk</span></span>
+      <span class="mast-group">#{days}<span class="mast-unit">d</span></span>
     </div>
   """
 style: """
-  #countdown-container {
-    position: relative;
+  .mast-chip {
     margin-left: var(--mast-left);
     margin-top: var(--mast-row-6);
-    background-color: black;
-    border-radius: 8px;
-    border: 2px solid grey;
-    color: white;
-    font-family: Arial, sans-serif;
-    font-size: 15px;
-    padding: 3px 6px
-    text-align: center; /* Align text horizontally */
-    display: inline-block; /* Make the container size dynamic based on text */
   }
 """

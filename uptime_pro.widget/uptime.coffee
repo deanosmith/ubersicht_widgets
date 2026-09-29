@@ -1,20 +1,4 @@
-#-----------------------------------------------------------------------#
-#                                                                       #
-# Uptime Pro for Übersicht                                              #
-#                                                                       #
-# Created July 2018 by Mike Pennella (github.com/mpen01/uptime_pro)     #
-#                                                                       #
-# Change the theme variable below to style the widget                   #
-# THEME OPTIONS: mono, paper, color or dark (default is color)          #
-# STYLE OPTIONS: min or full                                            #
-theme       = 'color'                                                   #
-style       = 'min'                                                     #
-#                                                                       #
-# POSITION WIDGET ON SCREEN                                             #
-pos_top     = 'var(--mast-row-2)'                                       #
-pos_left    = 'var(--mast-left)'                                        #
-#                                                                       #
-#-----------------------------------------------------------------------#
+# Based on Uptime Pro by Mike Pennella (github.com/mpen01/uptime_pro)
 
 command: """
   uptime | awk '{ if (/day/) { print $3 }
@@ -25,40 +9,19 @@ command: """
 refreshFrequency: 21600000
 
 style: """
-  top:    #{pos_top}
-  left:   #{pos_left}
-  font-family: Helvetica Neue
-  color: white
-
-  div
-    display: block
-    border-radius: 5px
-    background: black
-    font-size: 16px
-    border: 2px solid grey
-    font-weight: 400
-    opacity: 1
-    padding: 6px 5px
-
-  .uptime
-    font-size: 15px
-    font-weight: normal /* Set to normal weight */
-    color: white
-    margin: 3px
+  .mast-chip {
+    margin-left: var(--mast-left);
+    margin-top: var(--mast-row-2);
+  }
 """
 
-render: -> """
-  <div>
-    <span class='uptime'></span>
-  </div>
-"""
-
-update: (output, domEl) ->
-  values        = output.split("\n")
-  uptime        = values[0]
-  div           = $(domEl)
-
-  if (uptime != '')
-    div.find('.uptime').html("Uptime: #{uptime} days")
-  else
-    div.find('.uptime').html('Uptime is not available')
+render: (output) ->
+  uptime = (output or '').split("\n")[0].trim()
+  value = if uptime isnt '' then "#{uptime}<span class='mast-unit'>d</span>" else "<span class='mast-unit'>n/a</span>"
+  """
+    <div class="mast-chip" style="--accent: #6ff0b0">
+      <span class="mast-icon">⏻</span>
+      <span class="mast-group">#{value}</span>
+      <span class="mast-unit accent">up</span>
+    </div>
+  """

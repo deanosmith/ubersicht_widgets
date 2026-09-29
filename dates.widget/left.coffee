@@ -9,26 +9,18 @@ command: """
 refreshFrequency: 1000 * 60 * 60 * 12 # Refresh once every day
 
 style: """
-  #countdown-container {
-    position: relative;
+  .mast-chip {
     margin-left: var(--mast-left);
     margin-top: var(--mast-row-6);
-    background-color: black;
-    border-radius: 8px;
-    border: 2px solid grey;
-    color: white;
-    font-family: Arial, sans-serif;
-    font-size: 15px;
-    padding: 3px 6px
-    text-align: center; /* Align text horizontally */
-    display: inline-block; /* Make the container size dynamic based on text */
   }
 """
 
 render: (output) ->
   [daysLeft] = output.split(',').map(Number)
   """
-    <div id="countdown-container">
-      🎄 #{daysLeft} Days
+    <div class="mast-chip" style="--accent: #ff6b6b">
+      <span class="mast-icon">🎄</span>
+      <span class="mast-group">#{daysLeft}<span class="mast-unit">d</span></span>
+      <span class="mast-unit accent">to go</span>
     </div>
   """

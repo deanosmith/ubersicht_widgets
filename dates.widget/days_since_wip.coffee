@@ -24,28 +24,18 @@ command: """
 refreshFrequency: 1000 * 60 * 60 * 12 # Refresh once every day
 
 style: """
-  #countdown-container {
-    position: relative;
+  .mast-chip {
     margin-left: var(--mast-left);
     margin-top: var(--mast-row-7);
-    background-color: black;
-    border-radius: 8px;
-    border: 2px solid grey;
-    color: white;
-    font-family: Arial, sans-serif;
-    font-size: 15px;
-    padding: 3px 6px;
-    text-align: center; /* Align text horizontally */
-    display: inline-block; /* Make the container size dynamic based on text */
-    cursor: pointer; /* Indicate clickable */
+    cursor: pointer;
   }
 
-  #countdown-container input[type="date"] {
-    background: black;
+  .mast-chip input[type="date"] {
+    background: transparent;
     color: white;
     border: none;
-    font-size: 15px;
-    text-align: center;
+    font: inherit;
+    color-scheme: dark;
   }
 """
 
@@ -53,8 +43,10 @@ render: (output) ->
   [daysSince, target] = output.split(',')
   daysSince = Number(daysSince)
   """
-    <div id="countdown-container" data-target="#{target}">
-      !!!🐘 #{daysSince} Days
+    <div id="countdown-container" class="mast-chip" style="--accent: #c9a7ff" data-target="#{target}">
+      <span class="mast-icon">🐘</span>
+      <span class="mast-group">#{daysSince}<span class="mast-unit">d</span></span>
+      <span class="mast-unit accent">wip</span>
     </div>
   """
 

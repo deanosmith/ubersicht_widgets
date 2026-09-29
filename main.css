@@ -1,29 +1,117 @@
 /* Master layout, loaded by Übersicht for all widgets. Widgets read these via var(). */
 :root {
     --mast-left: 46px;
-    --mast-top: 0px;
+    --mast-top: 10px;
 
     /* Moon phase */
     --mast-moon-left: calc(var(--mast-left) - 3px);
     --mast-moon-top: calc(var(--mast-top) + 10px);
 
-    /* Box rows, top to bottom */
+    /* Chip rows, top to bottom: 30px chip + 8px gap */
+    --mast-pitch: 38px;
     --mast-row-1: calc(var(--mast-top) + 120px);
     /* year progress */
-    --mast-row-2: calc(var(--mast-top) + 153px);
+    --mast-row-2: calc(var(--mast-row-1) + var(--mast-pitch));
     /* uptime */
-    --mast-row-3: calc(var(--mast-top) + 195px);
+    --mast-row-3: calc(var(--mast-row-2) + var(--mast-pitch));
     /* sunrise / sunset */
-    --mast-row-4: calc(var(--mast-top) + 255px);
+    --mast-row-4: calc(var(--mast-row-3) + var(--mast-pitch));
     /* since-m-d */
-    --mast-row-5: calc(var(--mast-top) + 297px);
+    --mast-row-5: calc(var(--mast-row-4) + var(--mast-pitch));
     /* since-m-d-2, since-m-d-3 */
-    --mast-row-6: calc(var(--mast-top) + 340px);
+    --mast-row-6: calc(var(--mast-row-5) + var(--mast-pitch));
     /* since-w, weeks_left, left */
-    --mast-row-7: calc(var(--mast-top) + 385px);
+    --mast-row-7: calc(var(--mast-row-6) + var(--mast-pitch));
     /* left-2, days_since_wip */
 
     /* Sky clock, anchored to the bottom of the screen */
     --mast-clock-left: calc(var(--mast-left) + 125px);
     --mast-clock-bottom: -46px;
 }
+
+/* "Mast" chip design system, shared by every info widget. Set --accent per chip. */
+.mast-chip {
+    --accent: #ffffff;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 30px;
+    padding: 0 13px 0 4px;
+    border-radius: 15px;
+    background: #000000;
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    color: #ffffff;
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.mast-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(255, 255, 255, 0.1);
+    background: color-mix(in srgb, var(--accent) 24%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.mast-group {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 3px;
+}
+
+.mast-unit {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.mast-unit.accent {
+    color: var(--accent);
+}
+
+.mast-sep {
+    width: 1px;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.mast-track {
+    position: relative;
+    width: 110px;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.14);
+    overflow: hidden;
+}
+
+.mast-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 55%, transparent), var(--accent));
+    box-shadow: 0 0 8px var(--accent);
+}
+
+.mast-tick {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(10, 12, 18, 0.9);
+}
+
+#000000

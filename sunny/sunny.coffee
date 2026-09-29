@@ -33,8 +33,7 @@ try:
     sunrise_local = sunrise_utc.astimezone(ZoneInfo("Europe/Copenhagen"))
     sunset_local = sunset_utc.astimezone(ZoneInfo("Europe/Copenhagen"))
 
-    # Print times in 12-hour format without AM/PM
-    print(sunrise_local.strftime("%I:%M"), sunset_local.strftime("%I:%M"))
+    print(sunrise_local.strftime("%H:%M"), sunset_local.strftime("%H:%M"))
 except Exception:
     print("🔴 Error 🔴")
   '
@@ -43,42 +42,25 @@ except Exception:
 refreshFrequency: 1000 * 60 * 60 * 24 # Refresh once every day
 
 style: """
-  #countdown-container {
-    position: relative;
+  .mast-chip {
     margin-left: var(--mast-left);
     margin-top: var(--mast-row-3);
-    background-color: black;
-    border-radius: 6px;
-    border: 2px solid grey;
-    color: white;
-    font-family: Arial, sans-serif;
-    font-size: 15px;
-    padding: 4px 6px;
-    text-align: left; /* Align text horizontally */
-    display: inline-block; /* Make the container size dynamic based on text */
   }
 """
 
 render: (output) ->
-  cleaned = (output or "").trim()
-  return """
-    <div id="countdown-container">
-      Loading Error
-    </div>
-  """ if cleaned == "" or cleaned == "Loading Error"
-
-  times = cleaned.split(" ")
-  return """
-    <div id="countdown-container">
-      Loading Error
-    </div>
-  """ if times.length < 2
-
-  sunrise = times[0]
-  sunset = times[1]
+  times = (output or "").trim().split(" ")
+  body = if times.length is 2 and /^\d\d:\d\d$/.test(times[0])
+    """
+      <span class="mast-group">#{times[0]}<span class="mast-unit">↑</span></span>
+      <span class="mast-sep"></span>
+      <span class="mast-group">#{times[1]}<span class="mast-unit">↓</span></span>
+    """
+  else
+    "<span class='mast-unit'>no data</span>"
   """
-    <div id="countdown-container">
-      ☀ #{sunrise}<br/>
-      ☼ #{sunset}<br/>
+    <div class="mast-chip" style="--accent: #ffb547">
+      <span class="mast-icon">☀︎</span>
+      #{body}
     </div>
   """
