@@ -55,8 +55,10 @@ try:
             return "sunny"
         if code in (0, 1, 2):
             return "sunny"
-        if code in (3, 45, 48, 71, 73, 75, 77):
+        if code in (3, 45, 48):
             return "overcast"
+        if code in (71, 73, 75, 77, 85, 86):
+            return "snowy"
         if code in (51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99):
             return "rainy"
         return "sunny"
@@ -131,6 +133,11 @@ const polarToCartesian = (cx, cy, radius, angleDeg) => {
   };
 };
 
+const createSeededRandom = (seed) => () => {
+  const x = Math.sin(seed++) * 10000;
+  return x - Math.floor(x);
+};
+
 const describeSectorPath = (cx, cy, radius, startAngleDeg, endAngleDeg) => {
   const sweep = ((endAngleDeg - startAngleDeg) % 360 + 360) % 360 || 360;
   const start = polarToCartesian(cx, cy, radius, startAngleDeg);
@@ -149,12 +156,15 @@ const describeSectorPath = (cx, cy, radius, startAngleDeg, endAngleDeg) => {
 const getDaySkyStyle = (condition) => {
   const normalized = (condition || '').toLowerCase();
   if (normalized === 'overcast') {
-    return { dayColor: '#8a929cff', isRainy: false };
+    return { dayColor: '#8a929cff', precipitation: null };
   }
   if (normalized === 'rainy') {
-    return { dayColor: '#7a818bff', isRainy: true };
+    return { dayColor: '#7a818bff', precipitation: 'rain' };
   }
-  return { dayColor: '#1da0dcff', isRainy: false }; // Sunny / default
+  if (normalized === 'snowy') {
+    return { dayColor: '#8a96a5ff', precipitation: 'snow' };
+  }
+  return { dayColor: '#1da0dcff', precipitation: null }; // Sunny / default
 };
 
 const SYNODIC_MONTH_DAYS = 29.53058867;
@@ -242,10 +252,11 @@ export const render = ({ output }) => {
     }
   }
 
-  // Force rain for testing visuals (comment out to revert to live data)
+  // Force rain or snow for testing visuals (comment out to revert to live data)
   // weatherCondition = 'rainy';
+  // weatherCondition = 'snowy';
 
-  const { dayColor, isRainy } = getDaySkyStyle(weatherCondition);
+  const { dayColor, precipitation } = getDaySkyStyle(weatherCondition);
 
   // Debug output to console
   console.log(
@@ -338,26 +349,43 @@ export const render = ({ output }) => {
         );
       })()}
 
-      {/* Rain overlay for rainy weather (daylight segment only) */}
-      {isRainy && (() => {
+      {/* Precipitation overlay for rain or snow (daylight segment only) */}
+      {precipitation && (() => {
         const startDeg = (sunrise - 12) * 15 - 90;
         const endDeg = (sunset - 12) * 15 - 90;
-        const rainSectorPath = describeSectorPath(250, 250, 250, startDeg, endDeg);
+        const sectorPath = describeSectorPath(250, 250, 250, startDeg, endDeg);
+        const isSnowy = precipitation === 'snow';
+        const random = createSeededRandom(1000);
 
         return (
           <svg viewBox="0 0 500 500" style={{ position: 'absolute', top: '0%', left: '0%', width: '100%', height: '100%', borderRadius: '100%', zIndex: 5, pointerEvents: 'none' }}>
             <defs>
-              <pattern id="sky-clock-rain-pattern-primary" width="24" height="24" patternUnits="userSpaceOnUse" patternTransform="rotate(12)">
-                <line x1="5" y1="1" x2="5" y2="14" stroke="#dbe3eb" strokeWidth="3" strokeOpacity="0.18" strokeLinecap="round" />
-                <line x1="17" y1="8" x2="17" y2="21" stroke="#eef3f8" strokeWidth="2.5" strokeOpacity="0.12" strokeLinecap="round" />
-              </pattern>
-              <pattern id="sky-clock-rain-pattern-secondary" width="34" height="30" patternUnits="userSpaceOnUse" patternTransform="rotate(10)">
-                <line x1="8" y1="2" x2="8" y2="18" stroke="#ccd4dd" strokeWidth="3.5" strokeOpacity="0.1" strokeLinecap="round" />
-              </pattern>
+              <clipPath id="sky-clock-precipitation-clip">
+                <path d={sectorPath} />
+              </clipPath>
             </defs>
-            <path d={rainSectorPath} fill="rgba(222, 230, 238, 0.05)" />
-            <path d={rainSectorPath} fill="url(#sky-clock-rain-pattern-primary)" />
-            <path d={rainSectorPath} fill="url(#sky-clock-rain-pattern-secondary)" />
+            <path d={sectorPath} fill="rgba(222, 230, 238, 0.05)" />
+            <g clipPath="url(#sky-clock-precipitation-clip)" fill={isSnowy ? '#f5f8ff' : '#dbe3eb'}>
+              {Array.from({ length: 380 }, (_, i) => {
+                const angle = random() * 360;
+                const radius = Math.sqrt(random()) * 250;
+                const { x, y } = polarToCartesian(250, 250, radius, angle);
+                const size = 1.5 + random() * 1.1;
+                const opacity = 0.15 + random() * 0.13;
+
+                if (isSnowy) {
+                  return (
+                    <path key={`snow-${i}`} d="M 0 -1 L .28 -.28 L 1 0 L .28 .28 L 0 1 L -.28 .28 L -1 0 L -.28 -.28 Z"
+                      transform={`translate(${x} ${y}) scale(${size * 2.4})`} fillOpacity={opacity + 0.12} />
+                  );
+                }
+
+                return (
+                  <ellipse key={`rain-${i}`} cx={x} cy={y} rx={size} ry={size * 5}
+                    transform={`rotate(12 ${x} ${y})`} fillOpacity={opacity} />
+                );
+              })}
+            </g>
           </svg>
         );
       })()}
@@ -389,11 +417,7 @@ export const render = ({ output }) => {
         {(() => {
           const stars = [];
           // Deterministic random generator for consistent star positions across renders
-          let seed = 1;
-          const random = () => {
-            const x = Math.sin(seed++) * 10000;
-            return x - Math.floor(x);
-          };
+          const random = createSeededRandom(1);
 
           const sunriseAngleDeg = (sunrise - 12) * 15 - 90;
           const sunsetAngleDeg = (sunset - 12) * 15 - 90;
